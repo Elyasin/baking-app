@@ -10,7 +10,7 @@ import com.google.gson.GsonBuilder;
 import java.util.List;
 
 import bakingapp.example.com.MainActivity;
-import bakingapp.example.com.retrofit.model.Recipe;
+import bakingapp.example.com.model.Recipe;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,7 +47,7 @@ public class BakingApiController implements Callback<List<Recipe>> {
             for (int i = 0; i < recipeList.size(); i++) {
                 Log.i(TAG, recipeList.get(i).getName());
             }
-            ((MainActivity) mContext).displayText(recipeList);
+            ((MainActivity) mContext).displayRecipes(recipeList);
         } else {
             Log.e(TAG, response.errorBody().toString());
         }

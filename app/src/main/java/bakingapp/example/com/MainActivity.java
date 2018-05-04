@@ -10,15 +10,18 @@ import android.widget.ProgressBar;
 
 import java.util.List;
 
+import bakingapp.example.com.adapters.RecipeAdapter;
+import bakingapp.example.com.model.Recipe;
 import bakingapp.example.com.retrofit.BakingApiController;
-import bakingapp.example.com.retrofit.model.Recipe;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
 
     private RecyclerView mRecyclerView;
+
     private RecipeAdapter mRecipeAdapter;
+
     private ProgressBar mProgressBar;
 
     @Override
@@ -38,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecipeAdapter = new RecipeAdapter();
+        assert mRecyclerView != null;
+        mRecipeAdapter = new RecipeAdapter(this);
         mRecyclerView.setAdapter(mRecipeAdapter);
 
         BakingApiController bakingApiController = new BakingApiController(this);
@@ -47,8 +51,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void displayText(List<Recipe> recipeList) {
-        mRecipeAdapter.swap(recipeList.toArray(new Recipe[recipeList.size()]));
+    public void displayRecipes(List<Recipe> recipeList) {
+        mRecipeAdapter.swap(recipeList);
         mProgressBar.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.VISIBLE);
     }
