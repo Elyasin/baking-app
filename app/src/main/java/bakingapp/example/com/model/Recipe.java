@@ -23,7 +23,7 @@ public class Recipe implements Parcelable {
     private List<Ingredient> ingredients = null;
     @SerializedName("steps")
     @Expose
-    private List<Step> steps = null;
+    private List<RecipeStep> recipeSteps = null;
     @SerializedName("servings")
     @Expose
     private Integer servings;
@@ -43,14 +43,14 @@ public class Recipe implements Parcelable {
      * @param servings
      * @param name
      * @param image
-     * @param steps
+     * @param recipeSteps
      */
-    public Recipe(Integer id, String name, List<Ingredient> ingredients, List<Step> steps, Integer servings, String image) {
+    public Recipe(Integer id, String name, List<Ingredient> ingredients, List<RecipeStep> recipeSteps, Integer servings, String image) {
         super();
         this.id = id;
         this.name = name;
         this.ingredients = ingredients;
-        this.steps = steps;
+        this.recipeSteps = recipeSteps;
         this.servings = servings;
         this.image = image;
     }
@@ -79,12 +79,12 @@ public class Recipe implements Parcelable {
         this.ingredients = ingredients;
     }
 
-    public List<Step> getSteps() {
-        return steps;
+    public List<RecipeStep> getRecipeSteps() {
+        return recipeSteps;
     }
 
-    public void setSteps(List<Step> steps) {
-        this.steps = steps;
+    public void setRecipeSteps(List<RecipeStep> recipeSteps) {
+        this.recipeSteps = recipeSteps;
     }
 
     public Integer getServings() {
@@ -113,10 +113,10 @@ public class Recipe implements Parcelable {
             ingredients = null;
         }
         if (in.readByte() == 0x01) {
-            steps = new ArrayList<Step>();
-            in.readList(steps, Step.class.getClassLoader());
+            recipeSteps = new ArrayList<RecipeStep>();
+            in.readList(recipeSteps, RecipeStep.class.getClassLoader());
         } else {
-            steps = null;
+            recipeSteps = null;
         }
         servings = in.readByte() == 0x00 ? null : in.readInt();
         image = in.readString();
@@ -142,11 +142,11 @@ public class Recipe implements Parcelable {
             dest.writeByte((byte) (0x01));
             dest.writeList(ingredients);
         }
-        if (steps == null) {
+        if (recipeSteps == null) {
             dest.writeByte((byte) (0x00));
         } else {
             dest.writeByte((byte) (0x01));
-            dest.writeList(steps);
+            dest.writeList(recipeSteps);
         }
         if (servings == null) {
             dest.writeByte((byte) (0x00));

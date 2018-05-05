@@ -1,24 +1,33 @@
 package bakingapp.example.com;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import bakingapp.example.com.model.Recipe;
+import bakingapp.example.com.model.RecipeStep;
+
+import static bakingapp.example.com.RecipeStepDetailFragment.RECIPE_STEP_INTENT_KEY;
+import static bakingapp.example.com.RecipeStepsListActivity.RECIPE_INTENT_KEY;
+
 /**
  * An activity representing a single Instruction detail screen. This
  * activity is only used on narrow width devices. On tablet-size devices,
  * item details are presented side-by-side with a list of items
- * in a {@link InstructionListActivity}.
+ * in a {@link RecipeStepsListActivity}.
  */
-public class InstructionDetailActivity extends AppCompatActivity {
+public class RecipeStepDetailActivity extends AppCompatActivity {
+
+    private static final String TAG = RecipeStepDetailActivity.class.getSimpleName();
+
+    public static final String RECIPE_STEP_NUMBER_INTENT_KEY = "RECIPE_STEP_NUMBER_INTENT_KEY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_instruction_detail);
+        setContentView(R.layout.activity_recipe_step_detail);
 
         Toolbar toolbar = findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
@@ -41,10 +50,13 @@ public class InstructionDetailActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
+            Recipe recipe = getIntent().getParcelableExtra(RECIPE_INTENT_KEY);
+            int recipeStepNumber = getIntent().getIntExtra(RECIPE_STEP_NUMBER_INTENT_KEY, 0);
+            RecipeStep recipeStep = recipe.getRecipeSteps().get(recipeStepNumber);
+
             Bundle arguments = new Bundle();
-            arguments.putParcelable(InstructionDetailFragment.INSTRUCTION_INTENT_KEY,
-                    getIntent().getParcelableExtra(InstructionDetailFragment.INSTRUCTION_INTENT_KEY));
-            InstructionDetailFragment fragment = new InstructionDetailFragment();
+            arguments.putParcelable(RECIPE_STEP_INTENT_KEY, recipeStep);
+            RecipeStepDetailFragment fragment = new RecipeStepDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.instruction_detail_container, fragment)
@@ -62,7 +74,7 @@ public class InstructionDetailActivity extends AppCompatActivity {
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
-            navigateUpTo(new Intent(this, InstructionListActivity.class));
+            onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);

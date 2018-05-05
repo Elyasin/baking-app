@@ -21,8 +21,8 @@
         </activity>
 
         <activity
-            android:name=".InstructionListActivity"
-            android:label="@string/title_instruction_list"
+            android:name=".RecipeStepsListActivity"
+            android:label="@string/title_recipe_name"
             android:parentActivityName=".MainActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <meta-data
@@ -31,13 +31,13 @@
         </activity>
 
         <activity
-            android:name=".InstructionDetailActivity"
-            android:label="@string/title_instruction_detail"
-            android:parentActivityName=".InstructionListActivity"
+            android:name=".RecipeStepDetailActivity"
+            android:label="@string/title_recipe_name"
+            android:parentActivityName=".RecipeStepsListActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".InstructionListActivity"/>
+                android:value=".RecipeStepsListActivity"/>
         </activity>
 
     </application>

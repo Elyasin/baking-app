@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Baking App</string>
     <string name="main_activity_title">Baking Time</string>
-    <string name="title_instruction_list">Instructions</string>
-    <string name="title_instruction_detail">Instruction Detail</string>
+    <string name="title_recipe_name">Recipe Name</string>
 </resources>

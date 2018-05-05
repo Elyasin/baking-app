@@ -7,5 +7,5 @@
                                         android:layout_height="match_parent"
                                         android:layout_marginLeft="16dp"
                                         android:layout_marginRight="16dp"
-                                        tools:context=".InstructionListActivity"
-                                        tools:listitem="@layout/instruction_list_content"/>
+                                        tools:context=".RecipeStepsListActivity"
+                                        tools:listitem="@layout/recipe_steps_list_content"/>

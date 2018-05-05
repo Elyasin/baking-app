@@ -1,6 +1,5 @@
 package bakingapp.example.com.retrofit;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -23,10 +22,10 @@ public class BakingApiController implements Callback<List<Recipe>> {
 
     private static final String TAG = BakingApiController.class.getSimpleName();
 
-    private Context mContext;
+    private MainActivity mActivity;
 
-    public BakingApiController(Context mContext) {
-        this.mContext = mContext;
+    public BakingApiController(MainActivity mActivity) {
+        this.mActivity = mActivity;
     }
 
     public void start() {
@@ -44,10 +43,7 @@ public class BakingApiController implements Callback<List<Recipe>> {
     public void onResponse(@NonNull Call<List<Recipe>> call, @NonNull Response<List<Recipe>> response) {
         if (response.isSuccessful()) {
             List<Recipe> recipeList = response.body();
-            for (int i = 0; i < recipeList.size(); i++) {
-                Log.i(TAG, recipeList.get(i).getName());
-            }
-            ((MainActivity) mContext).displayRecipes(recipeList);
+            mActivity.displayRecipes(recipeList);
         } else {
             Log.e(TAG, response.errorBody().toString());
         }

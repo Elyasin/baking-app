@@ -3,7 +3,6 @@ package bakingapp.example.com.adapters;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +10,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import bakingapp.example.com.InstructionListActivity;
+import bakingapp.example.com.RecipeStepsListActivity;
 import bakingapp.example.com.MainActivity;
 import bakingapp.example.com.R;
 import bakingapp.example.com.model.Recipe;
@@ -59,14 +58,13 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
         viewHolder.mRecipeId.setText(String.valueOf(mRecipes.get(position).getId()));
         viewHolder.mRecipeName.setText(mRecipes.get(position).getName());
         viewHolder.mNoIngredients.setText(String.valueOf(mRecipes.get(position).getIngredients().size()));
-        viewHolder.mNoSteps.setText(String.valueOf(mRecipes.get(position).getSteps().size()));
+        viewHolder.mNoSteps.setText(String.valueOf(mRecipes.get(position).getRecipeSteps().size()));
         viewHolder.mServings.setText(String.valueOf(mRecipes.get(position).getServings()));
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i(TAG, "View clicked");
-                Intent intent = new Intent(mContext, InstructionListActivity.class);
-                intent.putExtra(InstructionListActivity.RECIPE_INTENT_KEY, mRecipes.get(viewHolder.getAdapterPosition()));
+                Intent intent = new Intent(mContext, RecipeStepsListActivity.class);
+                intent.putExtra(RecipeStepsListActivity.RECIPE_INTENT_KEY, mRecipes.get(viewHolder.getAdapterPosition()));
                 mContext.startActivity(intent);
             }
         });
