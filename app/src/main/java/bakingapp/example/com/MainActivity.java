@@ -8,8 +8,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import java.util.List;
-
 import bakingapp.example.com.adapters.RecipeAdapter;
 import bakingapp.example.com.model.Recipe;
 import bakingapp.example.com.retrofit.BakingApiController;
@@ -51,8 +49,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void displayRecipes(List<Recipe> recipeList) {
-        mRecipeAdapter.swap(recipeList);
+    public void displayRecipes(Recipe[] recipeArray) {
+        mRecipeAdapter.swap(recipeArray);
         mProgressBar.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.VISIBLE);
     }

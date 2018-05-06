@@ -1,5 +1,6 @@
 <android.support.v7.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -7,43 +8,89 @@
     android:layout_marginRight="8dp"
     android:layout_marginTop="8dp">
 
-    <LinearLayout
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
-
+        android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/recipe_id"
-            android:layout_width="match_parent"
+            android:id="@+id/recipe_name_label"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="Recipe No. 1"/>
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/recipe_name_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <TextView
+            android:id="@+id/no_ingredients_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/no_of_ingredients_label"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/recipe_name_label"
+            app:layout_constraintTop_toBottomOf="@+id/recipe_name_label"/>
+
+        <TextView
+            android:id="@+id/no_steps_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/no_of_steps_label"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/no_ingredients_label"
+            app:layout_constraintTop_toBottomOf="@+id/no_ingredients_label"/>
+
+        <TextView
+            android:id="@+id/servings_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/servings_label"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/no_steps_label"
+            app:layout_constraintTop_toBottomOf="@+id/no_steps_label"/>
 
         <TextView
             android:id="@+id/recipe_name"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/recipe_name_label"
+            app:layout_constraintTop_toTopOf="@+id/recipe_name_label"
             tools:text="Waffles"/>
 
+
         <TextView
-            android:id="@+id/recipe_no_ingredients"
-            android:layout_width="match_parent"
+            android:id="@+id/no_ingredients"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@+id/recipe_name"
+            app:layout_constraintTop_toTopOf="@+id/no_ingredients_label"
             tools:text="4"/>
 
         <TextView
-            android:id="@+id/recipe_no_steps"
-            android:layout_width="match_parent"
+            android:id="@+id/no_steps"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@+id/no_ingredients"
+            app:layout_constraintTop_toTopOf="@+id/no_steps_label"
             tools:text="10"/>
 
         <TextView
-            android:id="@+id/recipe_servings"
-            android:layout_width="match_parent"
+            android:id="@+id/servings"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@+id/no_steps"
+            app:layout_constraintTop_toTopOf="@+id/servings_label"
             tools:text="3"/>
 
-    </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.v7.widget.CardView>

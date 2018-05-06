@@ -43,7 +43,7 @@ public class BakingApiController implements Callback<List<Recipe>> {
     public void onResponse(@NonNull Call<List<Recipe>> call, @NonNull Response<List<Recipe>> response) {
         if (response.isSuccessful()) {
             List<Recipe> recipeList = response.body();
-            mActivity.displayRecipes(recipeList);
+            mActivity.displayRecipes(recipeList.toArray(new Recipe[recipeList.size()]));
         } else {
             Log.e(TAG, response.errorBody().toString());
         }

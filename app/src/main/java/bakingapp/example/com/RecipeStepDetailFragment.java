@@ -1,16 +1,26 @@
 package bakingapp.example.com;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Arrays;
+import java.util.List;
+
+import bakingapp.example.com.model.Ingredient;
+import bakingapp.example.com.model.Recipe;
 import bakingapp.example.com.model.RecipeStep;
+
+import static bakingapp.example.com.RecipeStepDetailActivity.RECIPE_STEP_POSITION_KEY;
+import static bakingapp.example.com.RecipeStepsListActivity.RECIPES_ARRAY_KEY;
+import static bakingapp.example.com.RecipeStepsListActivity.RECIPE_POSITION_KEY;
 
 /**
  * A fragment representing a single Instruction detail screen.
@@ -20,14 +30,9 @@ import bakingapp.example.com.model.RecipeStep;
  */
 public class RecipeStepDetailFragment extends Fragment {
 
-    /**
-     * The fragment argument representing the item ID that this fragment
-     * represents.
-     */
-    public static final String RECIPE_STEP_INTENT_KEY = "RECIPE_STEP_INTENT_KEY";
-
-
-    private RecipeStep mRecipeStep;
+    private Recipe[] mRecipeArray;
+    private int mRecipePosition;
+    private int mRecipeStepPosition;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -40,15 +45,24 @@ public class RecipeStepDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null && getArguments().containsKey(RECIPE_STEP_INTENT_KEY)) {
+        Bundle bundle = getArguments();
 
-            mRecipeStep = getArguments().getParcelable(RECIPE_STEP_INTENT_KEY);
+        if (bundle != null &&
+                bundle.containsKey(RECIPES_ARRAY_KEY) &&
+                bundle.containsKey(RECIPE_POSITION_KEY) &&
+                bundle.containsKey(RECIPE_STEP_POSITION_KEY)) {
 
-            Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
-            if (appBarLayout != null) {
-                appBarLayout.setTitle(mRecipeStep.getShortDescription());
-            }
+            Parcelable[] parcelables = bundle.getParcelableArray(RECIPES_ARRAY_KEY);
+            mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
+            mRecipePosition = bundle.getInt(RECIPE_POSITION_KEY);
+            Recipe recipe = mRecipeArray[mRecipePosition];
+            mRecipeStepPosition = bundle.getInt(RECIPE_STEP_POSITION_KEY);
+            RecipeStep recipeStep = recipe.getRecipeSteps().get(mRecipeStepPosition);
+
+            AppCompatActivity activity = (AppCompatActivity) this.getActivity();
+            Toolbar toolbar = activity.findViewById(R.id.detail_toolbar);
+            activity.setSupportActionBar(toolbar);
+            activity.getSupportActionBar().setTitle(mRecipeArray[mRecipePosition].getName());
         }
     }
 
@@ -57,8 +71,22 @@ public class RecipeStepDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.recipe_step_detail, container, false);
 
-        if (mRecipeStep != null) {
-            ((TextView) rootView.findViewById(R.id.instruction_detail)).setText(mRecipeStep.getDescription());
+        if (mRecipeStepPosition == 0) {
+            StringBuilder stringBuilder = new StringBuilder();
+            List<Ingredient> ingredientList = mRecipeArray[mRecipePosition].getIngredients();
+            for (int i = 0; i < ingredientList.size(); i++) {
+                String ingredient = ingredientList.get(i).getIngredient();
+                String measure = ingredientList.get(i).getMeasure();
+                float quantity = ingredientList.get(i).getQuantity();
+                ((TextView) rootView.findViewById(R.id.recipe_step_detail)).append(
+                        String.format("%s %s of %s", quantity, measure, ingredient) + "\n"
+                );
+            }
+        } else {
+            RecipeStep recipeStep = mRecipeArray[mRecipePosition].getRecipeSteps().get(mRecipeStepPosition);
+            if (recipeStep != null) {
+                ((TextView) rootView.findViewById(R.id.recipe_step_detail)).setText(recipeStep.getDescription());
+            }
         }
 
         return rootView;

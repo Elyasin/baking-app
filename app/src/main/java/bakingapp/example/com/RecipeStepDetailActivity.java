@@ -1,16 +1,19 @@
 package bakingapp.example.com;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import bakingapp.example.com.model.Recipe;
-import bakingapp.example.com.model.RecipeStep;
+import java.util.Arrays;
 
-import static bakingapp.example.com.RecipeStepDetailFragment.RECIPE_STEP_INTENT_KEY;
-import static bakingapp.example.com.RecipeStepsListActivity.RECIPE_INTENT_KEY;
+import bakingapp.example.com.model.Recipe;
+
+import static bakingapp.example.com.RecipeStepsListActivity.RECIPES_ARRAY_KEY;
+import static bakingapp.example.com.RecipeStepsListActivity.RECIPE_POSITION_KEY;
 
 /**
  * An activity representing a single Instruction detail screen. This
@@ -22,7 +25,7 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
 
     private static final String TAG = RecipeStepDetailActivity.class.getSimpleName();
 
-    public static final String RECIPE_STEP_NUMBER_INTENT_KEY = "RECIPE_STEP_NUMBER_INTENT_KEY";
+    public static final String RECIPE_STEP_POSITION_KEY = "recipe_step_position_key";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,16 +53,20 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
-            Recipe recipe = getIntent().getParcelableExtra(RECIPE_INTENT_KEY);
-            int recipeStepNumber = getIntent().getIntExtra(RECIPE_STEP_NUMBER_INTENT_KEY, 0);
-            RecipeStep recipeStep = recipe.getRecipeSteps().get(recipeStepNumber);
+            Intent intent = getIntent();
+            Parcelable[] parcelables = intent.getParcelableArrayExtra(RECIPES_ARRAY_KEY);
+            Recipe[] recipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
+            int recipePos = intent.getIntExtra(RECIPE_POSITION_KEY, 0);
+            int recipeStepPos = intent.getIntExtra(RECIPE_STEP_POSITION_KEY, 0);
 
             Bundle arguments = new Bundle();
-            arguments.putParcelable(RECIPE_STEP_INTENT_KEY, recipeStep);
+            arguments.putParcelableArray(RECIPES_ARRAY_KEY, recipeArray);
+            arguments.putInt(RECIPE_POSITION_KEY, recipePos);
+            arguments.putInt(RECIPE_STEP_POSITION_KEY, recipeStepPos);
             RecipeStepDetailFragment fragment = new RecipeStepDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.instruction_detail_container, fragment)
+                    .add(R.id.recipe_step_detail_container, fragment)
                     .commit();
         }
     }
@@ -68,12 +75,6 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
-            // This ID represents the Home or Up button. In the case of this
-            // activity, the Up button is shown. For
-            // more details, see the Navigation pattern on Android Design:
-            //
-            // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-            //
             onBackPressed();
             return true;
         }

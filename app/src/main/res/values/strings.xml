@@ -2,4 +2,9 @@
     <string name="app_name">Baking App</string>
     <string name="main_activity_title">Baking Time</string>
     <string name="title_recipe_name">Recipe Name</string>
+    <string name="recipe_name_label">Recipe name</string>
+    <string name="no_of_ingredients_label">No. of ingredients</string>
+    <string name="no_of_steps_label">No. of steps</string>
+    <string name="servings_label">Servings</string>
+    <string name="ingredients_label">Ingredients</string>
 </resources>

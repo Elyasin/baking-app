@@ -1,6 +1,7 @@
 package bakingapp.example.com;
 
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,6 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+
+import java.util.Arrays;
 
 import bakingapp.example.com.adapters.RecipeStepAdapter;
 import bakingapp.example.com.model.Recipe;
@@ -24,7 +27,8 @@ public class RecipeStepsListActivity extends AppCompatActivity {
 
     private static final String TAG = RecipeStepsListActivity.class.getSimpleName();
 
-    public static final String RECIPE_INTENT_KEY = "recipient_intent_key";
+    public static final String RECIPES_ARRAY_KEY = "recipe_array_key";
+    public static final String RECIPE_POSITION_KEY = "recipe_position_key";
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -32,7 +36,8 @@ public class RecipeStepsListActivity extends AppCompatActivity {
      */
     private boolean mTwoPane;
 
-    private Recipe mRecipe;
+    private Recipe[] mRecipeArray;
+    private int mRecipePositionNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +53,7 @@ public class RecipeStepsListActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (findViewById(R.id.instruction_detail_container) != null) {
+        if (findViewById(R.id.recipe_step_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-w900dp).
             // If this view is present, then the
@@ -57,21 +62,24 @@ public class RecipeStepsListActivity extends AppCompatActivity {
         }
 
         if (savedInstanceState == null)
-            if (getIntent().hasExtra(RECIPE_INTENT_KEY))
-                mRecipe = getIntent().getParcelableExtra(RECIPE_INTENT_KEY);
-            else
+            if (getIntent().hasExtra(RECIPES_ARRAY_KEY)) {
+                mRecipePositionNumber = getIntent().getIntExtra(RECIPE_POSITION_KEY, 0);
+                Parcelable[] parcelables = getIntent().getParcelableArrayExtra(RECIPES_ARRAY_KEY);
+                mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
+            } else
                 Log.e(TAG, "Intent does not have an 'extra'. Recipe object cannot be retrieved.");
 
-        getSupportActionBar().setTitle(mRecipe.getName());
+        getSupportActionBar().setTitle(mRecipeArray[mRecipePositionNumber].getName());
 
-        RecyclerView mRecyclerView = findViewById(R.id.instruction_list);
+        RecyclerView mRecyclerView = findViewById(R.id.recipe_steps_list);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setSaveEnabled(true);
 
         RecipeStepAdapter mRecipeStepAdapter = new RecipeStepAdapter(
                 this,
-                mRecipe,
+                mRecipeArray,
+                mRecipePositionNumber,
                 mTwoPane);
         mRecyclerView.setAdapter(mRecipeStepAdapter);
     }
@@ -80,12 +88,6 @@ public class RecipeStepsListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
-            // This ID represents the Home or Up button. In the case of this
-            // activity, the Up button is shown. For
-            // more details, see the Navigation pattern on Android Design:
-            //
-            // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-            //
             onBackPressed();
             return true;
         }
