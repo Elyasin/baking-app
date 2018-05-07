@@ -7,4 +7,6 @@
     <string name="no_of_steps_label">No. of steps</string>
     <string name="servings_label">Servings</string>
     <string name="ingredients_label">Ingredients</string>
+    <string name="previous_step">Previous step</string>
+    <string name="next_step">Next step</string>
 </resources>

@@ -78,9 +78,14 @@ public class RecipeStepDetailFragment extends Fragment {
                 String ingredient = ingredientList.get(i).getIngredient();
                 String measure = ingredientList.get(i).getMeasure();
                 float quantity = ingredientList.get(i).getQuantity();
-                ((TextView) rootView.findViewById(R.id.recipe_step_detail)).append(
-                        String.format("%s %s of %s", quantity, measure, ingredient) + "\n"
-                );
+                String text;
+                if (quantity == (long) quantity)
+                    text = String.format("%d %s of %s", (long) quantity, measure, ingredient);
+                else
+                    text = String.format("%s %s of %s", quantity, measure, ingredient);
+                ((TextView) rootView
+                        .findViewById(R.id.recipe_step_detail))
+                        .append(text + "\n");
             }
         } else {
             RecipeStep recipeStep = mRecipeArray[mRecipePosition].getRecipeSteps().get(mRecipeStepPosition);

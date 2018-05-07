@@ -3,6 +3,8 @@ package bakingapp.example.com;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -26,6 +28,9 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
     private static final String TAG = RecipeStepDetailActivity.class.getSimpleName();
 
     public static final String RECIPE_STEP_POSITION_KEY = "recipe_step_position_key";
+    private Recipe[] mRecipeArray;
+    private int mRecipePos;
+    private int mRecipeStepPos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +46,31 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.menu_previous_step:
+                                if (mRecipeStepPos > 0) {
+                                    mRecipeStepPos--;
+                                    replaceFragment(mRecipePos, mRecipeStepPos);
+                                }
+                                break;
+                            case R.id.menu_next_step:
+                                if (mRecipeStepPos < mRecipeArray[mRecipePos].getRecipeSteps().size() - 1) {
+                                    mRecipeStepPos++;
+                                    replaceFragment(mRecipePos, mRecipeStepPos);
+                                }
+                                break;
+                        }
+                        return true;
+                    }
+                }
+        );
+
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
         // (e.g. when rotating the screen from portrait to landscape).
@@ -50,25 +80,32 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
         //
         // http://developer.android.com/guide/components/fragments.html
         //
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null)
+
+        {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Intent intent = getIntent();
             Parcelable[] parcelables = intent.getParcelableArrayExtra(RECIPES_ARRAY_KEY);
-            Recipe[] recipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
-            int recipePos = intent.getIntExtra(RECIPE_POSITION_KEY, 0);
-            int recipeStepPos = intent.getIntExtra(RECIPE_STEP_POSITION_KEY, 0);
+            mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
+            mRecipePos = intent.getIntExtra(RECIPE_POSITION_KEY, 0);
+            mRecipeStepPos = intent.getIntExtra(RECIPE_STEP_POSITION_KEY, 0);
 
-            Bundle arguments = new Bundle();
-            arguments.putParcelableArray(RECIPES_ARRAY_KEY, recipeArray);
-            arguments.putInt(RECIPE_POSITION_KEY, recipePos);
-            arguments.putInt(RECIPE_STEP_POSITION_KEY, recipeStepPos);
-            RecipeStepDetailFragment fragment = new RecipeStepDetailFragment();
-            fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.recipe_step_detail_container, fragment)
-                    .commit();
+            replaceFragment(mRecipePos, mRecipeStepPos);
         }
+
+    }
+
+    private void replaceFragment(int recipePos, int recipeStepPos) {
+        Bundle arguments = new Bundle();
+        arguments.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
+        arguments.putInt(RECIPE_POSITION_KEY, recipePos);
+        arguments.putInt(RECIPE_STEP_POSITION_KEY, recipeStepPos);
+        RecipeStepDetailFragment fragment = new RecipeStepDetailFragment();
+        fragment.setArguments(arguments);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.recipe_step_detail_container, fragment)
+                .commit();
     }
 
     @Override
