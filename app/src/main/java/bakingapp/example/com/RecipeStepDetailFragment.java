@@ -1,15 +1,30 @@
 package bakingapp.example.com;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 
 import java.util.Arrays;
 import java.util.List;
@@ -69,10 +84,12 @@ public class RecipeStepDetailFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View rootView = inflater.inflate(R.layout.recipe_step_detail, container, false);
 
+        RecipeStep recipeStep = mRecipeArray[mRecipePosition].getRecipeSteps().get(mRecipeStepPosition);
+
         if (mRecipeStepPosition == 0) {
-            StringBuilder stringBuilder = new StringBuilder();
             List<Ingredient> ingredientList = mRecipeArray[mRecipePosition].getIngredients();
             for (int i = 0; i < ingredientList.size(); i++) {
                 String ingredient = ingredientList.get(i).getIngredient();
@@ -88,10 +105,38 @@ public class RecipeStepDetailFragment extends Fragment {
                         .append(text + "\n");
             }
         } else {
-            RecipeStep recipeStep = mRecipeArray[mRecipePosition].getRecipeSteps().get(mRecipeStepPosition);
-            if (recipeStep != null) {
-                ((TextView) rootView.findViewById(R.id.recipe_step_detail)).setText(recipeStep.getDescription());
-            }
+            ((TextView) rootView.findViewById(R.id.recipe_step_detail)).setText(recipeStep.getDescription());
+        }
+
+        String videoURLString = (recipeStep.getVideoURL() != null ? recipeStep.getVideoURL() : recipeStep.getThumbnailURL());
+        PlayerView playerView = rootView.findViewById(R.id.player_view);
+        View noVideoView = rootView.findViewById(R.id.no_video_view);
+
+        if (TextUtils.isEmpty(videoURLString)) {
+
+            noVideoView.setVisibility(View.VISIBLE);
+            playerView.setVisibility(View.GONE);
+
+        } else {
+
+            noVideoView.setVisibility(View.GONE);
+            playerView.setVisibility(View.VISIBLE);
+
+            Uri videoUri = Uri.parse(videoURLString);
+
+            TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory(null);
+            TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
+            SimpleExoPlayer simpleExoPlayer = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector);
+            playerView.setPlayer(simpleExoPlayer);
+
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(
+                    getActivity(),
+                    Util.getUserAgent(getActivity(), "Baking App"), null);
+            MediaSource mediaSource = new ExtractorMediaSource.
+                    Factory(dataSourceFactory).
+                    createMediaSource(videoUri);
+
+            simpleExoPlayer.prepare(mediaSource);
         }
 
         return rootView;

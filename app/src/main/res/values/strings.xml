@@ -9,4 +9,5 @@
     <string name="ingredients_label">Ingredients</string>
     <string name="previous_step">Previous step</string>
     <string name="next_step">Next step</string>
+    <string name="no_video_available">No video available</string>
 </resources>
