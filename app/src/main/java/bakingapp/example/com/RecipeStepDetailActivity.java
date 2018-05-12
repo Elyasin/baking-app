@@ -1,6 +1,7 @@
 package bakingapp.example.com;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -37,61 +38,66 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_step_detail);
 
-        Toolbar toolbar = findViewById(R.id.detail_toolbar);
-        setSupportActionBar(toolbar);
+        if (findViewById(R.id.recipe_step_detail_container) != null) {
 
-        // Show the Up button in the action bar.
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener(
-                new BottomNavigationView.OnNavigationItemSelectedListener() {
+                Toolbar toolbar = findViewById(R.id.detail_toolbar);
+                setSupportActionBar(toolbar);
 
-                    @Override
-                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.menu_previous_step:
-                                if (mRecipeStepPos > 0) {
-                                    mRecipeStepPos--;
-                                    replaceFragment(mRecipePos, mRecipeStepPos);
-                                }
-                                break;
-                            case R.id.menu_next_step:
-                                if (mRecipeStepPos < mRecipeArray[mRecipePos].getRecipeSteps().size() - 1) {
-                                    mRecipeStepPos++;
-                                    replaceFragment(mRecipePos, mRecipeStepPos);
-                                }
-                                break;
-                        }
-                        return true;
-                    }
+                // Show the Up button in the action bar.
+                ActionBar actionBar = getSupportActionBar();
+                if (actionBar != null) {
+                    actionBar.setDisplayHomeAsUpEnabled(true);
                 }
-        );
 
-        // savedInstanceState is non-null when there is fragment state
-        // saved from previous configurations of this activity
-        // (e.g. when rotating the screen from portrait to landscape).
-        // In this case, the fragment will automatically be re-added
-        // to its container so we don't need to manually add it.
-        // For more information, see the Fragments API guide at:
-        //
-        // http://developer.android.com/guide/components/fragments.html
-        //
-        if (savedInstanceState == null)
+                BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+                bottomNavigationView.setOnNavigationItemSelectedListener(
+                        new BottomNavigationView.OnNavigationItemSelectedListener() {
 
-        {
-            // Create the detail fragment and add it to the activity
-            // using a fragment transaction.
-            Intent intent = getIntent();
-            Parcelable[] parcelables = intent.getParcelableArrayExtra(RECIPES_ARRAY_KEY);
-            mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
-            mRecipePos = intent.getIntExtra(RECIPE_POSITION_KEY, 0);
-            mRecipeStepPos = intent.getIntExtra(RECIPE_STEP_POSITION_KEY, 0);
+                            @Override
+                            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                                switch (item.getItemId()) {
+                                    case R.id.menu_previous_step:
+                                        if (mRecipeStepPos > 0) {
+                                            mRecipeStepPos--;
+                                            replaceFragment(mRecipePos, mRecipeStepPos);
+                                        }
+                                        break;
+                                    case R.id.menu_next_step:
+                                        if (mRecipeStepPos < mRecipeArray[mRecipePos].getRecipeSteps().size() - 1) {
+                                            mRecipeStepPos++;
+                                            replaceFragment(mRecipePos, mRecipeStepPos);
+                                        }
+                                        break;
+                                }
+                                return true;
+                            }
+                        }
+                );
 
-            replaceFragment(mRecipePos, mRecipeStepPos);
+            }
+            // savedInstanceState is non-null when there is fragment state
+            // saved from previous configurations of this activity
+            // (e.g. when rotating the screen from portrait to landscape).
+            // In this case, the fragment will automatically be re-added
+            // to its container so we don't need to manually add it.
+            // For more information, see the Fragments API guide at:
+            //
+            // http://developer.android.com/guide/components/fragments.html
+            //
+            if (savedInstanceState == null) {
+                // Create the detail fragment and add it to the activity
+                // using a fragment transaction.
+                Intent intent = getIntent();
+                Parcelable[] parcelables = intent.getParcelableArrayExtra(RECIPES_ARRAY_KEY);
+                mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
+                mRecipePos = intent.getIntExtra(RECIPE_POSITION_KEY, 0);
+                mRecipeStepPos = intent.getIntExtra(RECIPE_STEP_POSITION_KEY, 0);
+
+                replaceFragment(mRecipePos, mRecipeStepPos);
+            }
+
         }
 
     }

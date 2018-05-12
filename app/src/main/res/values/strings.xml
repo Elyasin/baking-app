@@ -10,4 +10,5 @@
     <string name="previous_step">Previous step</string>
     <string name="next_step">Next step</string>
     <string name="no_video_available">No video available</string>
+    <string name="full_screen_button">Full screen button</string>
 </resources>

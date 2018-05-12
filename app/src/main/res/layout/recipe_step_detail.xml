@@ -9,16 +9,16 @@
     tools:context=".RecipeStepDetailFragment">
 
     <FrameLayout
+        android:id="@+id/media_frame"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1.5">
 
         <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/player_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
-            app:default_artwork="@drawable/exo_controls_play"/>
+            app:resize_mode="fit"/>
 
         <ImageView
             android:id="@+id/no_video_view"
@@ -26,6 +26,7 @@
             android:layout_height="match_parent"
             android:background="@android:color/white"
             android:contentDescription="@string/no_video_available"
+            android:padding="16dp"
             android:src="@drawable/ic_videocam_off_black_24dp"/>
 
     </FrameLayout>
@@ -33,7 +34,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="2">
 
         <TextView
             android:id="@+id/recipe_step_detail"
