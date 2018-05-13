@@ -48,6 +48,10 @@ import static bakingapp.example.com.MainActivity.RECIPE_STEP_POSITION_KEY;
  */
 public class RecipeStepDetailFragment extends Fragment {
 
+
+    private static final String TAG = RecipeStepDetailFragment.class.getSimpleName();
+
+
     private final String PLAY_WHEN_READY_KEY = "play_when_ready_key";
     private final String CURRENT_WINDOW_KEY = "current_window_key";
     private final String PLAYBACK_POSITION_KEY = "playback_position_key";
@@ -216,9 +220,9 @@ public class RecipeStepDetailFragment extends Fragment {
         outState.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
         outState.putInt(RECIPE_POSITION_KEY, mRecipePosition);
         outState.putInt(RECIPE_STEP_POSITION_KEY, mRecipeStepPosition);
-        outState.putBoolean(PLAY_WHEN_READY_KEY, mPlayWhenReady);
-        outState.putInt(CURRENT_WINDOW_KEY, mCurrentWindow);
-        outState.putLong(PLAYBACK_POSITION_KEY, mPlaybackPosition);
+        outState.putBoolean(PLAY_WHEN_READY_KEY, mSimpleExoPlayer.getPlayWhenReady());
+        outState.putInt(CURRENT_WINDOW_KEY, mSimpleExoPlayer.getCurrentWindowIndex());
+        outState.putLong(PLAYBACK_POSITION_KEY, mSimpleExoPlayer.getCurrentPosition());
         super.onSaveInstanceState(outState);
     }
 
@@ -304,14 +308,11 @@ public class RecipeStepDetailFragment extends Fragment {
                 new DefaultHttpDataSourceFactory("exoplayer-baking-app")).
                 createMediaSource(uri);
 
-        mSimpleExoPlayer.prepare(mediaSource, true, false);
+        mSimpleExoPlayer.prepare(mediaSource, false, false);
     }
 
     private void releasePlayer() {
         if (mSimpleExoPlayer != null) {
-            mPlaybackPosition = mSimpleExoPlayer.getCurrentPosition();
-            mCurrentWindow = mSimpleExoPlayer.getCurrentWindowIndex();
-            mPlayWhenReady = mSimpleExoPlayer.getPlayWhenReady();
             mSimpleExoPlayer.release();
             mSimpleExoPlayer = null;
         }
