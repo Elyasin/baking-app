@@ -75,25 +75,6 @@
             android:textSize="14sp"
             android:textStyle="bold"/>
 
-        <FrameLayout
-            android:id="@+id/exo_fullscreen_button"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="end">
-
-            <ImageView
-                android:id="@+id/exo_fullscreen_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center"
-                android:adjustViewBounds="true"
-                android:contentDescription="@string/full_screen_button"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_fullscreen_black_24dp"
-                android:tint="@color/colorPrimary"/>
-
-        </FrameLayout>
-
     </LinearLayout>
 
 </LinearLayout>

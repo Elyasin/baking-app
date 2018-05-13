@@ -59,8 +59,8 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, RecipeStepsListActivity.class);
-                intent.putExtra(RecipeStepsListActivity.RECIPES_ARRAY_KEY, mRecipeArray);
-                intent.putExtra(RecipeStepsListActivity.RECIPE_POSITION_KEY, viewHolder.getAdapterPosition());
+                intent.putExtra(MainActivity.RECIPES_ARRAY_KEY, mRecipeArray);
+                intent.putExtra(MainActivity.RECIPE_POSITION_KEY, viewHolder.getAdapterPosition());
                 mContext.startActivity(intent);
             }
         });

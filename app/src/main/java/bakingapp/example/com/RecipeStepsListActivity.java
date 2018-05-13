@@ -27,9 +27,6 @@ public class RecipeStepsListActivity extends AppCompatActivity {
 
     private static final String TAG = RecipeStepsListActivity.class.getSimpleName();
 
-    public static final String RECIPES_ARRAY_KEY = "recipe_array_key";
-    public static final String RECIPE_POSITION_KEY = "recipe_position_key";
-
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -61,13 +58,18 @@ public class RecipeStepsListActivity extends AppCompatActivity {
             mTwoPane = true;
         }
 
-        if (savedInstanceState == null)
-            if (getIntent().hasExtra(RECIPES_ARRAY_KEY)) {
-                mRecipePositionNumber = getIntent().getIntExtra(RECIPE_POSITION_KEY, 0);
-                Parcelable[] parcelables = getIntent().getParcelableArrayExtra(RECIPES_ARRAY_KEY);
+        if (savedInstanceState == null) {
+            if (getIntent().hasExtra(MainActivity.RECIPES_ARRAY_KEY)) {
+                mRecipePositionNumber = getIntent().getIntExtra(MainActivity.RECIPE_POSITION_KEY, 0);
+                Parcelable[] parcelables = getIntent().getParcelableArrayExtra(MainActivity.RECIPES_ARRAY_KEY);
                 mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
             } else
                 Log.e(TAG, "Intent does not have an 'extra'. Recipe object cannot be retrieved.");
+        } else {
+            Parcelable[] parcelables = savedInstanceState.getParcelableArray(MainActivity.RECIPES_ARRAY_KEY);
+            mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
+            mRecipePositionNumber = savedInstanceState.getInt(MainActivity.RECIPE_POSITION_KEY);
+        }
 
         getSupportActionBar().setTitle(mRecipeArray[mRecipePositionNumber].getName());
 
@@ -82,6 +84,15 @@ public class RecipeStepsListActivity extends AppCompatActivity {
                 mRecipePositionNumber,
                 mTwoPane);
         mRecyclerView.setAdapter(mRecipeStepAdapter);
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArray(MainActivity.RECIPES_ARRAY_KEY, mRecipeArray);
+        outState.putInt(MainActivity.RECIPE_POSITION_KEY, mRecipePositionNumber);
+        super.onSaveInstanceState(outState);
+        Log.d(TAG, "onSaveInstanceState done");
     }
 
     @Override

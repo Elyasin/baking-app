@@ -8,8 +8,6 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,9 +36,9 @@ import bakingapp.example.com.model.Ingredient;
 import bakingapp.example.com.model.Recipe;
 import bakingapp.example.com.model.RecipeStep;
 
-import static bakingapp.example.com.RecipeStepDetailActivity.RECIPE_STEP_POSITION_KEY;
-import static bakingapp.example.com.RecipeStepsListActivity.RECIPES_ARRAY_KEY;
-import static bakingapp.example.com.RecipeStepsListActivity.RECIPE_POSITION_KEY;
+import static bakingapp.example.com.MainActivity.RECIPES_ARRAY_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_POSITION_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_STEP_POSITION_KEY;
 
 /**
  * A fragment representing a single Instruction detail screen.
@@ -50,15 +48,22 @@ import static bakingapp.example.com.RecipeStepsListActivity.RECIPE_POSITION_KEY;
  */
 public class RecipeStepDetailFragment extends Fragment {
 
+    private final String PLAY_WHEN_READY_KEY = "play_when_ready_key";
+    private final String CURRENT_WINDOW_KEY = "current_window_key";
+    private final String PLAYBACK_POSITION_KEY = "playback_position_key";
+
     private Recipe[] mRecipeArray;
+    private RecipeStep mRecipeStep;
     private int mRecipePosition;
     private int mRecipeStepPosition;
+
     private PlayerView mPlayerView;
     private SimpleExoPlayer mSimpleExoPlayer;
+
     private boolean mPlayWhenReady = true;
     private int mCurrentWindow = 0;
     private long mPlaybackPosition = 0;
-    private RecipeStep mRecipeStep;
+
 
     private Dialog mFullScreenDialog;
     private boolean mExoPlayerFullscreen = false;
@@ -109,6 +114,7 @@ public class RecipeStepDetailFragment extends Fragment {
         });
     }
 
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -120,28 +126,35 @@ public class RecipeStepDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle bundle = getArguments();
+        if (savedInstanceState == null) {
+            Bundle bundle = getArguments();
 
-        if (bundle != null &&
-                bundle.containsKey(RECIPES_ARRAY_KEY) &&
-                bundle.containsKey(RECIPE_POSITION_KEY) &&
-                bundle.containsKey(RECIPE_STEP_POSITION_KEY)) {
+            if (bundle != null &&
+                    bundle.containsKey(RECIPES_ARRAY_KEY) &&
+                    bundle.containsKey(RECIPE_POSITION_KEY) &&
+                    bundle.containsKey(RECIPE_STEP_POSITION_KEY)) {
 
-            Parcelable[] parcelables = bundle.getParcelableArray(RECIPES_ARRAY_KEY);
-            mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
-            mRecipePosition = bundle.getInt(RECIPE_POSITION_KEY);
-            Recipe recipe = mRecipeArray[mRecipePosition];
-            mRecipeStepPosition = bundle.getInt(RECIPE_STEP_POSITION_KEY);
-            mRecipeStep = recipe.getRecipeSteps().get(mRecipeStepPosition);
-
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                AppCompatActivity activity = (AppCompatActivity) this.getActivity();
-                Toolbar toolbar = activity.findViewById(R.id.detail_toolbar);
-                activity.setSupportActionBar(toolbar);
-                activity.getSupportActionBar().setTitle(mRecipeArray[mRecipePosition].getName());
+                Parcelable[] parcelables = bundle.getParcelableArray(RECIPES_ARRAY_KEY);
+                mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
+                mRecipePosition = bundle.getInt(RECIPE_POSITION_KEY);
+                mRecipeStepPosition = bundle.getInt(RECIPE_STEP_POSITION_KEY);
             }
+
+        } else {
+            Parcelable[] parcelables = savedInstanceState.getParcelableArray(RECIPES_ARRAY_KEY);
+            mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
+            mRecipePosition = savedInstanceState.getInt(RECIPE_POSITION_KEY);
+            mRecipeStepPosition = savedInstanceState.getInt(RECIPE_STEP_POSITION_KEY);
+
+            mPlayWhenReady = savedInstanceState.getBoolean(PLAY_WHEN_READY_KEY);
+            mCurrentWindow = savedInstanceState.getInt(CURRENT_WINDOW_KEY);
+            mPlaybackPosition = savedInstanceState.getLong(PLAYBACK_POSITION_KEY);
         }
+
+        mRecipeStep = mRecipeArray[mRecipePosition].getRecipeSteps().get(mRecipeStepPosition);
+
     }
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -151,9 +164,7 @@ public class RecipeStepDetailFragment extends Fragment {
 
         RecipeStep recipeStep = mRecipeArray[mRecipePosition].getRecipeSteps().get(mRecipeStepPosition);
 
-
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-
 
             if (mRecipeStepPosition == 0) {
                 List<Ingredient> ingredientList = mRecipeArray[mRecipePosition].getIngredients();
@@ -192,7 +203,23 @@ public class RecipeStepDetailFragment extends Fragment {
 
         }
 
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            hideSystemUi();
+        }
+
         return rootView;
+    }
+
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
+        outState.putInt(RECIPE_POSITION_KEY, mRecipePosition);
+        outState.putInt(RECIPE_STEP_POSITION_KEY, mRecipeStepPosition);
+        outState.putBoolean(PLAY_WHEN_READY_KEY, mPlayWhenReady);
+        outState.putInt(CURRENT_WINDOW_KEY, mCurrentWindow);
+        outState.putLong(PLAYBACK_POSITION_KEY, mPlaybackPosition);
+        super.onSaveInstanceState(outState);
     }
 
 
@@ -212,10 +239,7 @@ public class RecipeStepDetailFragment extends Fragment {
 
     @Override
     public void onResume() {
-        initFullscreenDialog();
-        initFullscreenButton();
         super.onResume();
-        //hideSystemUi();
         if ((Util.SDK_INT <= 23 || mSimpleExoPlayer == null)) {
             String videoURL = mRecipeStep.getVideoURL();
             String thumbnailURL = mRecipeStep.getThumbnailURL();
@@ -225,11 +249,15 @@ public class RecipeStepDetailFragment extends Fragment {
                 initializePlayer(thumbnailURL);
             }
         }
-        if (mExoPlayerFullscreen) {
-            ((ViewGroup) mPlayerView.getParent()).removeView(mPlayerView);
-            mFullScreenDialog.addContentView(mPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_fullscreen_black_24dp));
-            mFullScreenDialog.show();
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            initFullscreenDialog();
+            initFullscreenButton();
+            if (mExoPlayerFullscreen) {
+                ((ViewGroup) mPlayerView.getParent()).removeView(mPlayerView);
+                mFullScreenDialog.addContentView(mPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_fullscreen_black_24dp));
+                mFullScreenDialog.show();
+            }
         }
     }
 

@@ -20,9 +20,9 @@ import bakingapp.example.com.RecipeStepsListActivity;
 import bakingapp.example.com.model.Ingredient;
 import bakingapp.example.com.model.Recipe;
 
-import static bakingapp.example.com.RecipeStepDetailActivity.RECIPE_STEP_POSITION_KEY;
-import static bakingapp.example.com.RecipeStepsListActivity.RECIPES_ARRAY_KEY;
-import static bakingapp.example.com.RecipeStepsListActivity.RECIPE_POSITION_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_STEP_POSITION_KEY;
+import static bakingapp.example.com.MainActivity.RECIPES_ARRAY_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_POSITION_KEY;
 
 public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 

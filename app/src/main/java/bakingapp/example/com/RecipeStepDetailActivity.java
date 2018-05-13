@@ -15,8 +15,8 @@ import java.util.Arrays;
 
 import bakingapp.example.com.model.Recipe;
 
-import static bakingapp.example.com.RecipeStepsListActivity.RECIPES_ARRAY_KEY;
-import static bakingapp.example.com.RecipeStepsListActivity.RECIPE_POSITION_KEY;
+import static bakingapp.example.com.MainActivity.RECIPES_ARRAY_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_POSITION_KEY;
 
 /**
  * An activity representing a single Instruction detail screen. This
@@ -28,10 +28,9 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
 
     private static final String TAG = RecipeStepDetailActivity.class.getSimpleName();
 
-    public static final String RECIPE_STEP_POSITION_KEY = "recipe_step_position_key";
     private Recipe[] mRecipeArray;
-    private int mRecipePos;
-    private int mRecipeStepPos;
+    private int mRecipePositionNumber;
+    private int mRecipeStepPositionNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,43 +39,6 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
 
         if (findViewById(R.id.recipe_step_detail_container) != null) {
 
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-
-                Toolbar toolbar = findViewById(R.id.detail_toolbar);
-                setSupportActionBar(toolbar);
-
-                // Show the Up button in the action bar.
-                ActionBar actionBar = getSupportActionBar();
-                if (actionBar != null) {
-                    actionBar.setDisplayHomeAsUpEnabled(true);
-                }
-
-                BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-                bottomNavigationView.setOnNavigationItemSelectedListener(
-                        new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-                            @Override
-                            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                                switch (item.getItemId()) {
-                                    case R.id.menu_previous_step:
-                                        if (mRecipeStepPos > 0) {
-                                            mRecipeStepPos--;
-                                            replaceFragment(mRecipePos, mRecipeStepPos);
-                                        }
-                                        break;
-                                    case R.id.menu_next_step:
-                                        if (mRecipeStepPos < mRecipeArray[mRecipePos].getRecipeSteps().size() - 1) {
-                                            mRecipeStepPos++;
-                                            replaceFragment(mRecipePos, mRecipeStepPos);
-                                        }
-                                        break;
-                                }
-                                return true;
-                            }
-                        }
-                );
-
-            }
             // savedInstanceState is non-null when there is fragment state
             // saved from previous configurations of this activity
             // (e.g. when rotating the screen from portrait to landscape).
@@ -92,21 +54,64 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
                 Intent intent = getIntent();
                 Parcelable[] parcelables = intent.getParcelableArrayExtra(RECIPES_ARRAY_KEY);
                 mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
-                mRecipePos = intent.getIntExtra(RECIPE_POSITION_KEY, 0);
-                mRecipeStepPos = intent.getIntExtra(RECIPE_STEP_POSITION_KEY, 0);
+                mRecipePositionNumber = intent.getIntExtra(RECIPE_POSITION_KEY, 0);
+                mRecipeStepPositionNumber = intent.getIntExtra(MainActivity.RECIPE_STEP_POSITION_KEY, 0);
 
-                replaceFragment(mRecipePos, mRecipeStepPos);
+                replaceFragment();
+
+            } else {
+                Parcelable[] parcelables = savedInstanceState.getParcelableArray(RECIPES_ARRAY_KEY);
+                mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
+                mRecipePositionNumber = savedInstanceState.getInt(RECIPE_POSITION_KEY);
+                mRecipeStepPositionNumber = savedInstanceState.getInt(MainActivity.RECIPE_STEP_POSITION_KEY);
             }
 
-        }
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
 
+                Toolbar toolbar = findViewById(R.id.detail_toolbar);
+                setSupportActionBar(toolbar);
+
+                // Show the Up button in the action bar.
+                ActionBar actionBar = getSupportActionBar();
+                if (actionBar != null) {
+                    actionBar.setDisplayHomeAsUpEnabled(true);
+                }
+                getSupportActionBar().setTitle(mRecipeArray[mRecipePositionNumber].getName());
+
+
+                BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+                bottomNavigationView.setOnNavigationItemSelectedListener(
+                        new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+                            @Override
+                            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                                switch (item.getItemId()) {
+                                    case R.id.menu_previous_step:
+                                        if (mRecipeStepPositionNumber > 0) {
+                                            mRecipeStepPositionNumber--;
+                                            replaceFragment();
+                                        }
+                                        break;
+                                    case R.id.menu_next_step:
+                                        if (mRecipeStepPositionNumber < mRecipeArray[mRecipePositionNumber].getRecipeSteps().size() - 1) {
+                                            mRecipeStepPositionNumber++;
+                                            replaceFragment();
+                                        }
+                                        break;
+                                }
+                                return true;
+                            }
+                        }
+                );
+            }
+        }
     }
 
-    private void replaceFragment(int recipePos, int recipeStepPos) {
+    private void replaceFragment() {
         Bundle arguments = new Bundle();
         arguments.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
-        arguments.putInt(RECIPE_POSITION_KEY, recipePos);
-        arguments.putInt(RECIPE_STEP_POSITION_KEY, recipeStepPos);
+        arguments.putInt(RECIPE_POSITION_KEY, mRecipePositionNumber);
+        arguments.putInt(MainActivity.RECIPE_STEP_POSITION_KEY, mRecipeStepPositionNumber);
         RecipeStepDetailFragment fragment = new RecipeStepDetailFragment();
         fragment.setArguments(arguments);
         getSupportFragmentManager().beginTransaction()
@@ -123,4 +128,13 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
+        outState.putInt(RECIPE_POSITION_KEY, mRecipePositionNumber);
+        outState.putInt(MainActivity.RECIPE_STEP_POSITION_KEY, mRecipeStepPositionNumber);
+        super.onSaveInstanceState(outState);
+    }
+
 }
