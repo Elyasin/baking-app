@@ -92,7 +92,6 @@ public class RecipeStepsListActivity extends AppCompatActivity {
         outState.putParcelableArray(MainActivity.RECIPES_ARRAY_KEY, mRecipeArray);
         outState.putInt(MainActivity.RECIPE_POSITION_KEY, mRecipePositionNumber);
         super.onSaveInstanceState(outState);
-        Log.d(TAG, "onSaveInstanceState done");
     }
 
     @Override

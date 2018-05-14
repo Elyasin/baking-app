@@ -220,9 +220,18 @@ public class RecipeStepDetailFragment extends Fragment {
         outState.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
         outState.putInt(RECIPE_POSITION_KEY, mRecipePosition);
         outState.putInt(RECIPE_STEP_POSITION_KEY, mRecipeStepPosition);
-        outState.putBoolean(PLAY_WHEN_READY_KEY, mSimpleExoPlayer.getPlayWhenReady());
-        outState.putInt(CURRENT_WINDOW_KEY, mSimpleExoPlayer.getCurrentWindowIndex());
-        outState.putLong(PLAYBACK_POSITION_KEY, mSimpleExoPlayer.getCurrentPosition());
+
+        //No guarantee where in the lifecycle onSaveInstanceState is called
+        //check onPause (release of player), onStop (release of player), onSaveInstanceState
+        if (mSimpleExoPlayer != null) {
+            outState.putBoolean(PLAY_WHEN_READY_KEY, mSimpleExoPlayer.getPlayWhenReady());
+            outState.putInt(CURRENT_WINDOW_KEY, mSimpleExoPlayer.getCurrentWindowIndex());
+            outState.putLong(PLAYBACK_POSITION_KEY, mSimpleExoPlayer.getCurrentPosition());
+        } else {
+            outState.putBoolean(PLAY_WHEN_READY_KEY, mPlayWhenReady);
+            outState.putInt(CURRENT_WINDOW_KEY, mCurrentWindow);
+            outState.putLong(PLAYBACK_POSITION_KEY, mPlaybackPosition);
+        }
         super.onSaveInstanceState(outState);
     }
 
@@ -313,6 +322,9 @@ public class RecipeStepDetailFragment extends Fragment {
 
     private void releasePlayer() {
         if (mSimpleExoPlayer != null) {
+            mPlayWhenReady = mSimpleExoPlayer.getPlayWhenReady();
+            mCurrentWindow = mSimpleExoPlayer.getCurrentWindowIndex();
+            mPlaybackPosition = mSimpleExoPlayer.getCurrentPosition();
             mSimpleExoPlayer.release();
             mSimpleExoPlayer = null;
         }

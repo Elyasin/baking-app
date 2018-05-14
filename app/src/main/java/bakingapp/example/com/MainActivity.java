@@ -1,9 +1,10 @@
 package bakingapp.example.com;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -46,7 +47,19 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setVisibility(View.INVISIBLE);
 
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        if (getResources().getConfiguration().smallestScreenWidthDp >= 600) {
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+                mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+            else
+                mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+        } else {
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+                mRecyclerView.setLayoutManager(new GridLayoutManager(this, 1));
+            else
+                mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        }
+
         mRecyclerView.setSaveEnabled(true);
         mRecipeAdapter = new RecipeAdapter(this);
         mRecyclerView.setAdapter(mRecipeAdapter);
