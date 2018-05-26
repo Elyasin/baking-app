@@ -56,6 +56,7 @@ public class RecipeStepDetailFragment extends Fragment {
     private final String CURRENT_WINDOW_KEY = "current_window_key";
     private final String PLAYBACK_POSITION_KEY = "playback_position_key";
 
+
     private Recipe[] mRecipeArray;
     private RecipeStep mRecipeStep;
     private int mRecipePosition;
@@ -168,7 +169,8 @@ public class RecipeStepDetailFragment extends Fragment {
 
         RecipeStep recipeStep = mRecipeArray[mRecipePosition].getRecipeSteps().get(mRecipeStepPosition);
 
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ||
+                getResources().getConfiguration().smallestScreenWidthDp >= 600) {
 
             if (mRecipeStepPosition == 0) {
                 List<Ingredient> ingredientList = mRecipeArray[mRecipePosition].getIngredients();
@@ -207,7 +209,8 @@ public class RecipeStepDetailFragment extends Fragment {
 
         }
 
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE &&
+                !(getResources().getConfiguration().screenWidthDp >= 600)) {
             hideSystemUi();
         }
 
@@ -262,7 +265,8 @@ public class RecipeStepDetailFragment extends Fragment {
                 initializePlayer(thumbnailURL);
             }
         }
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ||
+                getResources().getConfiguration().smallestScreenWidthDp >= 600) {
             initFullscreenDialog();
             initFullscreenButton();
             if (mExoPlayerFullscreen) {
@@ -329,4 +333,5 @@ public class RecipeStepDetailFragment extends Fragment {
             mSimpleExoPlayer = null;
         }
     }
+
 }

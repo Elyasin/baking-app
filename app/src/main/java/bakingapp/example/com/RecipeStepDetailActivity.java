@@ -37,6 +37,12 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_step_detail);
 
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE &&
+                getResources().getConfiguration().smallestScreenWidthDp >= 600) {
+            finish();
+            return;
+        }
+
         if (findViewById(R.id.recipe_step_detail_container) != null) {
 
             // savedInstanceState is non-null when there is fragment state

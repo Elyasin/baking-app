@@ -13,7 +13,7 @@
     tools:context=".RecipeStepsListActivity">
 
     <!--
-    This layout is a two-pane layout for the Instructions
+    This layout is a two-pane layout for the
     master/detail flow.
     
     -->
@@ -22,7 +22,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/recipe_steps_list"
-        android:name="bakingapp.example.com.InstructionListFragment"
+        android:name="bakingapp.example.com.RecipeStepDetailFragment"
         android:layout_width="@dimen/item_width"
         android:layout_height="match_parent"
         android:layout_marginLeft="16dp"

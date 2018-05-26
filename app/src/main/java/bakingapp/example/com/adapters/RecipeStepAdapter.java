@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,9 +19,9 @@ import bakingapp.example.com.RecipeStepsListActivity;
 import bakingapp.example.com.model.Ingredient;
 import bakingapp.example.com.model.Recipe;
 
-import static bakingapp.example.com.MainActivity.RECIPE_STEP_POSITION_KEY;
 import static bakingapp.example.com.MainActivity.RECIPES_ARRAY_KEY;
 import static bakingapp.example.com.MainActivity.RECIPE_POSITION_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_STEP_POSITION_KEY;
 
 public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -73,7 +72,6 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 );
                 break;
             default:
-                Log.e(TAG, "View type is not supported: " + viewType);
                 throw new IllegalArgumentException("The view type is not supported: " + viewType);
         }
 
@@ -103,7 +101,6 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 }
                 vHolder2.recipeStepIngredients.setText(stringBuilder);
         }
-        //holder.itemView.setTag(mRecipeArray[mRecipePositionNumber].getRecipeSteps().get(position));
         holder.itemView.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
