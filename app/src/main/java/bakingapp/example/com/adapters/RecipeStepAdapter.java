@@ -52,7 +52,7 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        RecyclerView.ViewHolder viewHolder;
+        final RecyclerView.ViewHolder viewHolder;
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
 
         switch (viewType) {
@@ -75,6 +75,36 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             default:
                 throw new IllegalArgumentException("The view type is not supported: " + viewType);
         }
+
+        //Click on item -> display the item
+        //2 pane mode uses fragment
+        //1 pane mode launches activity
+        viewHolder.itemView.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (mTwoPane) {
+                            //RecipeStep recipeStep = (RecipeStep) view.getTag();
+                            Bundle arguments = new Bundle();
+                            arguments.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
+                            arguments.putInt(RECIPE_POSITION_KEY, mRecipePositionNumber);
+                            arguments.putInt(RECIPE_STEP_POSITION_KEY, viewHolder.getAdapterPosition());
+                            RecipeStepDetailFragment fragment = new RecipeStepDetailFragment();
+                            fragment.setArguments(arguments);
+                            mParentActivity.getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.recipe_step_detail_container, fragment)
+                                    .commit();
+                        } else {
+                            Context context = view.getContext();
+                            Intent intent = new Intent(context, RecipeStepDetailActivity.class);
+                            intent.putExtra(RECIPES_ARRAY_KEY, mRecipeArray);
+                            intent.putExtra(RECIPE_POSITION_KEY, mRecipePositionNumber);
+                            intent.putExtra(RECIPE_STEP_POSITION_KEY, viewHolder.getAdapterPosition());
+                            context.startActivity(intent);
+                        }
+                    }
+                }
+        );
 
         return viewHolder;
     }
@@ -102,34 +132,6 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 }
                 vHolder2.recipeStepIngredients.setText(stringBuilder);
         }
-
-        // TODO setting listener in onCreateViewHolder is more efficient I think ? but well... later
-        holder.itemView.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (mTwoPane) {
-                            //RecipeStep recipeStep = (RecipeStep) view.getTag();
-                            Bundle arguments = new Bundle();
-                            arguments.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
-                            arguments.putInt(RECIPE_POSITION_KEY, mRecipePositionNumber);
-                            arguments.putInt(RECIPE_STEP_POSITION_KEY, holder.getAdapterPosition());
-                            RecipeStepDetailFragment fragment = new RecipeStepDetailFragment();
-                            fragment.setArguments(arguments);
-                            mParentActivity.getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.recipe_step_detail_container, fragment)
-                                    .commit();
-                        } else {
-                            Context context = view.getContext();
-                            Intent intent = new Intent(context, RecipeStepDetailActivity.class);
-                            intent.putExtra(RECIPES_ARRAY_KEY, mRecipeArray);
-                            intent.putExtra(RECIPE_POSITION_KEY, mRecipePositionNumber);
-                            intent.putExtra(RECIPE_STEP_POSITION_KEY, holder.getAdapterPosition());
-                            context.startActivity(intent);
-                        }
-                    }
-                }
-        );
 
         // when in 2 pane mode display first item by default (ingredients)
         if (position == 0 && mTwoPane) {

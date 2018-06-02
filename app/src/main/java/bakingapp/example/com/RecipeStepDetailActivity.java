@@ -38,6 +38,7 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_step_detail);
 
+        //Activity never used in tablet when in landscape mode.
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE &&
                 getResources().getConfiguration().smallestScreenWidthDp >= 600) {
             finish();
