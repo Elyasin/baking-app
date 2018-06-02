@@ -31,6 +31,7 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
     private Recipe[] mRecipeArray;
     private int mRecipePositionNumber;
     private int mRecipeStepPositionNumber;
+    private RecipeStepDetailFragment mRecipeDetailFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,10 +119,10 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
         arguments.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
         arguments.putInt(RECIPE_POSITION_KEY, mRecipePositionNumber);
         arguments.putInt(MainActivity.RECIPE_STEP_POSITION_KEY, mRecipeStepPositionNumber);
-        RecipeStepDetailFragment fragment = new RecipeStepDetailFragment();
-        fragment.setArguments(arguments);
+        mRecipeDetailFragment = new RecipeStepDetailFragment();
+        mRecipeDetailFragment.setArguments(arguments);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.recipe_step_detail_container, fragment)
+                .replace(R.id.recipe_step_detail_container, mRecipeDetailFragment)
                 .commit();
     }
 

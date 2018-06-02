@@ -37,6 +37,7 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     private final boolean mTwoPane;
 
+
     public RecipeStepAdapter(RecipeStepsListActivity parent,
                              Recipe[] recipeArray,
                              int position,
@@ -101,6 +102,8 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 }
                 vHolder2.recipeStepIngredients.setText(stringBuilder);
         }
+
+        // TODO setting listener in onCreateViewHolder is more efficient I think ? but well... later
         holder.itemView.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -127,6 +130,11 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     }
                 }
         );
+
+        // when in 2 pane mode display first item by default (ingredients)
+        if (position == 0 && mTwoPane) {
+            holder.itemView.performClick();
+        }
     }
 
     @Override
@@ -134,7 +142,7 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         return mRecipeArray[mRecipePositionNumber].getRecipeSteps().size();
     }
 
-    class RecipeStepViewHolder extends RecyclerView.ViewHolder {
+    static class RecipeStepViewHolder extends RecyclerView.ViewHolder {
         final TextView recipeStepTextView;
 
         RecipeStepViewHolder(View view) {

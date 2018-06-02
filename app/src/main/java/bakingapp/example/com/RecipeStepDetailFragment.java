@@ -95,7 +95,6 @@ public class RecipeStepDetailFragment extends Fragment {
     }
 
     private void closeFullscreenDialog() {
-
         ((ViewGroup) mPlayerView.getParent()).removeView(mPlayerView);
         ((FrameLayout) getActivity().findViewById(R.id.media_frame)).addView(mPlayerView);
         mExoPlayerFullscreen = false;
