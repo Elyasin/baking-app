@@ -2,7 +2,6 @@ package bakingapp.example.com;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,26 +9,29 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import java.util.Arrays;
+import java.util.List;
 
 import bakingapp.example.com.adapters.RecipeAdapter;
-import bakingapp.example.com.model.Recipe;
+import bakingapp.example.com.db.RecipeDatabase;
+import bakingapp.example.com.db.model.Recipe;
 import bakingapp.example.com.retrofit.BakingApiController;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements BakingApiController.OnDataLoadedListener {
 
     public static final String TAG = MainActivity.class.getSimpleName();
 
-    public static final String RECIPES_ARRAY_KEY = "recipe_array_key";
-    public static final String RECIPE_POSITION_KEY = "recipe_position_key";
-    public static final String RECIPE_STEP_POSITION_KEY = "recipe_step_position_key";
+    public static final String RECIPE_ID_KEY = "recipe_id_key";
+    public static final String RECIPE_STEP_ID_KEY = "recpie_step_id_key";
 
-    private Recipe[] mRecipeArray;
+    private List<Recipe> mRecipeList;
 
     private RecyclerView mRecyclerView;
     private RecipeAdapter mRecipeAdapter;
 
     private ProgressBar mProgressBar;
+
+    private RecipeDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,26 +66,24 @@ public class MainActivity extends AppCompatActivity {
         mRecipeAdapter = new RecipeAdapter(this);
         mRecyclerView.setAdapter(mRecipeAdapter);
 
-        if (savedInstanceState == null) {
-            BakingApiController bakingApiController = new BakingApiController(this);
+        mDb = RecipeDatabase.getsInstance(getApplicationContext());
+
+        //Get data from Room
+        mRecipeList = mDb.recipeDAO().loadAllRecipes();
+        //Room is empty. Get data from internet
+        if (mRecipeList == null || mRecipeList.isEmpty()) {
+            BakingApiController bakingApiController = new BakingApiController(MainActivity.this);
             bakingApiController.start();
-        } else {
-            Parcelable[] parcelables = savedInstanceState.getParcelableArray(RECIPES_ARRAY_KEY);
-            mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
-            displayRecipes(mRecipeArray);
+        } else { //Room has data. Display it.
+            displayRecipes();
         }
-
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
-        super.onSaveInstanceState(outState);
-    }
 
-    public void displayRecipes(Recipe[] recipeArray) {
-        mRecipeArray = recipeArray;
-        mRecipeAdapter.swap(mRecipeArray);
+    public void displayRecipes() {
+        mRecipeList = mDb.recipeDAO().loadAllRecipes();
+        mRecipeAdapter.setRecipes(mRecipeList);
+
         mProgressBar.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.VISIBLE);
     }

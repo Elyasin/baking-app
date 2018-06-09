@@ -1,5 +1,6 @@
 package bakingapp.example.com.retrofit;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -8,8 +9,11 @@ import com.google.gson.GsonBuilder;
 
 import java.util.List;
 
-import bakingapp.example.com.MainActivity;
-import bakingapp.example.com.model.Recipe;
+import bakingapp.example.com.db.RecipeDatabase;
+import bakingapp.example.com.db.model.Step;
+import bakingapp.example.com.retrofit.model.Ingredient;
+import bakingapp.example.com.retrofit.model.Recipe;
+import bakingapp.example.com.retrofit.model.RecipeStep;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -18,14 +22,25 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class BakingApiController implements Callback<List<Recipe>> {
 
+
+    public interface OnDataLoadedListener {
+        void displayRecipes();
+    }
+
+
     private static final String BASE_URL = "http://go.udacity.com/";
 
     private static final String TAG = BakingApiController.class.getSimpleName();
 
-    private MainActivity mActivity;
+    private OnDataLoadedListener mListener;
+    private Context mContext;
 
-    public BakingApiController(MainActivity mActivity) {
-        this.mActivity = mActivity;
+
+    public BakingApiController(Context context) {
+        if (!(context instanceof OnDataLoadedListener))
+            throw new IllegalArgumentException("Class must implement OnDataLoadedListener");
+        this.mContext = context;
+        this.mListener = (OnDataLoadedListener) context;
     }
 
     public void start() {
@@ -42,8 +57,8 @@ public class BakingApiController implements Callback<List<Recipe>> {
     @Override
     public void onResponse(@NonNull Call<List<Recipe>> call, @NonNull Response<List<Recipe>> response) {
         if (response.isSuccessful()) {
-            List<Recipe> recipeList = response.body();
-            mActivity.displayRecipes(recipeList.toArray(new Recipe[recipeList.size()]));
+            List<Recipe> recipes = response.body();
+            insertRecipesIntoRoom(recipes);
         } else {
             Log.e(TAG, response.errorBody().toString());
         }
@@ -52,5 +67,30 @@ public class BakingApiController implements Callback<List<Recipe>> {
     @Override
     public void onFailure(@NonNull Call<List<Recipe>> call, @NonNull Throwable t) {
         t.printStackTrace();
+    }
+
+
+    private void insertRecipesIntoRoom(List<Recipe> recipes) {
+
+        RecipeDatabase db = RecipeDatabase.getsInstance(mContext.getApplicationContext());
+
+        for (Recipe r : recipes) {
+
+            bakingapp.example.com.db.model.Recipe recipe = new bakingapp.example.com.db.model.Recipe(r);
+            db.recipeDAO().insertRecipe(recipe);
+
+            for (Ingredient i : r.getIngredients()) {
+                bakingapp.example.com.db.model.Ingredient ingredient =
+                        new bakingapp.example.com.db.model.Ingredient(recipe.getId(), i);
+                db.ingredientDAO().insertIngredient(ingredient);
+            }
+
+            for (RecipeStep recipeStep : r.getRecipeSteps()) {
+                Step step = new Step(r.getId(), recipeStep);
+                db.stepDAO().insertStep(step);
+            }
+        }
+
+        mListener.displayRecipes();
     }
 }

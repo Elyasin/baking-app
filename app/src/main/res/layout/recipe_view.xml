@@ -23,36 +23,15 @@
             app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
-            android:id="@+id/no_ingredients_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/no_of_ingredients_label"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/recipe_name_label"
-            app:layout_constraintTop_toBottomOf="@+id/recipe_name_label"/>
-
-        <TextView
-            android:id="@+id/no_steps_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/no_of_steps_label"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/no_ingredients_label"
-            app:layout_constraintTop_toBottomOf="@+id/no_ingredients_label"/>
-
-        <TextView
             android:id="@+id/servings_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:text="@string/servings_label"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/no_steps_label"
-            app:layout_constraintTop_toBottomOf="@+id/no_steps_label"/>
+            app:layout_constraintStart_toStartOf="@+id/recipe_name_label"
+            app:layout_constraintTop_toBottomOf="@+id/recipe_name_label"/>
 
         <TextView
             android:id="@+id/recipe_name"
@@ -68,28 +47,14 @@
 
 
         <TextView
-            android:id="@+id/no_ingredients"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="@+id/recipe_name"
-            app:layout_constraintTop_toTopOf="@+id/no_ingredients_label"
-            tools:text="4"/>
-
-        <TextView
-            android:id="@+id/no_steps"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="@+id/no_ingredients"
-            app:layout_constraintTop_toTopOf="@+id/no_steps_label"
-            tools:text="10"/>
-
-        <TextView
             android:id="@+id/servings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="@+id/no_steps"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/servings_label"
+            app:layout_constraintStart_toStartOf="@+id/recipe_name"
             app:layout_constraintTop_toTopOf="@+id/servings_label"
-            tools:text="3"/>
+            tools:text="10"/>
 
     </android.support.constraint.ConstraintLayout>
 

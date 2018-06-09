@@ -4,11 +4,11 @@ import android.app.Dialog;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,17 +28,14 @@ import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import bakingapp.example.com.model.Ingredient;
-import bakingapp.example.com.model.Recipe;
-import bakingapp.example.com.model.RecipeStep;
+import bakingapp.example.com.db.RecipeDatabase;
+import bakingapp.example.com.db.model.Step;
 
-import static bakingapp.example.com.MainActivity.RECIPES_ARRAY_KEY;
-import static bakingapp.example.com.MainActivity.RECIPE_POSITION_KEY;
-import static bakingapp.example.com.MainActivity.RECIPE_STEP_POSITION_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_ID_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_STEP_ID_KEY;
 
 /**
  * A fragment representing a single Instruction detail screen.
@@ -57,10 +54,11 @@ public class RecipeStepDetailFragment extends Fragment {
     private final String PLAYBACK_POSITION_KEY = "playback_position_key";
 
 
-    private Recipe[] mRecipeArray;
-    private RecipeStep mRecipeStep;
-    private int mRecipePosition;
-    private int mRecipeStepPosition;
+    private bakingapp.example.com.db.model.Recipe mRecipe;
+    private Step mStep;
+    private List<bakingapp.example.com.db.model.Ingredient> mIngredients;
+
+    private RecipeDatabase mDb;
 
     private PlayerView mPlayerView;
     private SimpleExoPlayer mSimpleExoPlayer;
@@ -130,32 +128,35 @@ public class RecipeStepDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mDb = RecipeDatabase.getsInstance(getActivity().getApplicationContext());
+        int recipeID, stepID;
+
         if (savedInstanceState == null) {
             Bundle bundle = getArguments();
 
             if (bundle != null &&
-                    bundle.containsKey(RECIPES_ARRAY_KEY) &&
-                    bundle.containsKey(RECIPE_POSITION_KEY) &&
-                    bundle.containsKey(RECIPE_STEP_POSITION_KEY)) {
+                    bundle.containsKey(RECIPE_ID_KEY) &&
+                    bundle.containsKey(RECIPE_STEP_ID_KEY)) {
 
-                Parcelable[] parcelables = bundle.getParcelableArray(RECIPES_ARRAY_KEY);
-                mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
-                mRecipePosition = bundle.getInt(RECIPE_POSITION_KEY);
-                mRecipeStepPosition = bundle.getInt(RECIPE_STEP_POSITION_KEY);
+                recipeID = bundle.getInt(RECIPE_ID_KEY);
+                stepID = bundle.getInt(RECIPE_STEP_ID_KEY);
+            } else {
+                Log.e(TAG, "Bundle is null or expected keys are not present");
+                throw new IllegalArgumentException("Bundle is null or expected keys are not present");
             }
 
         } else {
-            Parcelable[] parcelables = savedInstanceState.getParcelableArray(RECIPES_ARRAY_KEY);
-            mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
-            mRecipePosition = savedInstanceState.getInt(RECIPE_POSITION_KEY);
-            mRecipeStepPosition = savedInstanceState.getInt(RECIPE_STEP_POSITION_KEY);
+            recipeID = savedInstanceState.getInt(RECIPE_ID_KEY);
+            stepID = savedInstanceState.getInt(RECIPE_STEP_ID_KEY);
 
             mPlayWhenReady = savedInstanceState.getBoolean(PLAY_WHEN_READY_KEY);
             mCurrentWindow = savedInstanceState.getInt(CURRENT_WINDOW_KEY);
             mPlaybackPosition = savedInstanceState.getLong(PLAYBACK_POSITION_KEY);
         }
 
-        mRecipeStep = mRecipeArray[mRecipePosition].getRecipeSteps().get(mRecipeStepPosition);
+        mRecipe = mDb.recipeDAO().loadRecipe(recipeID);
+        mStep = mDb.stepDAO().loadStep(recipeID, stepID);
+        mIngredients = mDb.ingredientDAO().loadAllIngredientsByRecipe(recipeID);
 
     }
 
@@ -166,17 +167,14 @@ public class RecipeStepDetailFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.recipe_step_detail, container, false);
 
-        RecipeStep recipeStep = mRecipeArray[mRecipePosition].getRecipeSteps().get(mRecipeStepPosition);
-
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ||
                 getResources().getConfiguration().smallestScreenWidthDp >= 600) {
 
-            if (mRecipeStepPosition == 0) {
-                List<Ingredient> ingredientList = mRecipeArray[mRecipePosition].getIngredients();
-                for (int i = 0; i < ingredientList.size(); i++) {
-                    String ingredient = ingredientList.get(i).getIngredient();
-                    String measure = ingredientList.get(i).getMeasure();
-                    float quantity = ingredientList.get(i).getQuantity();
+            if (mStep.getStepId() == 0) {
+                for (int i = 0; i < mIngredients.size(); i++) {
+                    String ingredient = mIngredients.get(i).getIngredient();
+                    String measure = mIngredients.get(i).getMeasure();
+                    float quantity = mIngredients.get(i).getQuantity();
                     String text;
                     if (quantity == (long) quantity)
                         text = String.format(Locale.ENGLISH, "%d %s of %s", (long) quantity, measure, ingredient);
@@ -187,14 +185,14 @@ public class RecipeStepDetailFragment extends Fragment {
                             .append(text + "\n");
                 }
             } else {
-                ((TextView) rootView.findViewById(R.id.recipe_step_detail)).setText(recipeStep.getDescription());
+                ((TextView) rootView.findViewById(R.id.recipe_step_detail)).setText(mStep.getDescription());
             }
 
         }
 
         mPlayerView = rootView.findViewById(R.id.player_view);
         View noVideoView = rootView.findViewById(R.id.no_video_view);
-        String videoURLString = (recipeStep.getVideoURL() != null ? recipeStep.getVideoURL() : recipeStep.getThumbnailURL());
+        String videoURLString = (mStep.getVideoURL() != null ? mStep.getVideoURL() : mStep.getThumbnailURL());
 
         if (TextUtils.isEmpty(videoURLString)) {
 
@@ -219,9 +217,8 @@ public class RecipeStepDetailFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
-        outState.putInt(RECIPE_POSITION_KEY, mRecipePosition);
-        outState.putInt(RECIPE_STEP_POSITION_KEY, mRecipeStepPosition);
+        outState.putInt(RECIPE_ID_KEY, mRecipe.getId());
+        outState.putInt(RECIPE_STEP_ID_KEY, mStep.getStepId());
 
         //No guarantee where in the lifecycle onSaveInstanceState is called
         //check onPause (release of player), onStop (release of player), onSaveInstanceState
@@ -242,8 +239,8 @@ public class RecipeStepDetailFragment extends Fragment {
     public void onStart() {
         super.onStart();
         if (Util.SDK_INT > 23) {
-            String videoURL = mRecipeStep.getVideoURL();
-            String thumbnailURL = mRecipeStep.getThumbnailURL();
+            String videoURL = mStep.getVideoURL();
+            String thumbnailURL = mStep.getThumbnailURL();
             if (!TextUtils.isEmpty(videoURL)) {
                 initializePlayer(videoURL);
             } else if (!TextUtils.isEmpty(thumbnailURL)) {
@@ -256,8 +253,8 @@ public class RecipeStepDetailFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if ((Util.SDK_INT <= 23 || mSimpleExoPlayer == null)) {
-            String videoURL = mRecipeStep.getVideoURL();
-            String thumbnailURL = mRecipeStep.getThumbnailURL();
+            String videoURL = mStep.getVideoURL();
+            String thumbnailURL = mStep.getThumbnailURL();
             if (!TextUtils.isEmpty(videoURL)) {
                 initializePlayer(videoURL);
             } else if (!TextUtils.isEmpty(thumbnailURL)) {

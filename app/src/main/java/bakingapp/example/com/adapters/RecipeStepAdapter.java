@@ -16,12 +16,12 @@ import bakingapp.example.com.R;
 import bakingapp.example.com.RecipeStepDetailActivity;
 import bakingapp.example.com.RecipeStepDetailFragment;
 import bakingapp.example.com.RecipeStepsListActivity;
-import bakingapp.example.com.model.Ingredient;
-import bakingapp.example.com.model.Recipe;
+import bakingapp.example.com.db.model.Ingredient;
+import bakingapp.example.com.db.model.Recipe;
+import bakingapp.example.com.db.model.Step;
 
-import static bakingapp.example.com.MainActivity.RECIPES_ARRAY_KEY;
-import static bakingapp.example.com.MainActivity.RECIPE_POSITION_KEY;
-import static bakingapp.example.com.MainActivity.RECIPE_STEP_POSITION_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_ID_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_STEP_ID_KEY;
 
 public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -30,21 +30,18 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private static final int INGREDIENTS_VIEW_TYPE = 0;
     private static final int RECIPE_STEP_VIEW_TYPE = 1;
 
-    private final RecipeStepsListActivity mParentActivity;
+    private RecipeStepsListActivity mParentActivity;
 
-    private final Recipe[] mRecipeArray;
-    private final int mRecipePositionNumber;
+    private Recipe mRecipe;
+    private List<Step> mSteps;
+    private List<Ingredient> mIngredients;
 
     private final boolean mTwoPane;
 
 
     public RecipeStepAdapter(RecipeStepsListActivity parent,
-                             Recipe[] recipeArray,
-                             int position,
                              boolean twoPane) {
-        mRecipeArray = recipeArray;
         mParentActivity = parent;
-        mRecipePositionNumber = position;
         mTwoPane = twoPane;
     }
 
@@ -86,9 +83,8 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                         if (mTwoPane) {
                             //RecipeStep recipeStep = (RecipeStep) view.getTag();
                             Bundle arguments = new Bundle();
-                            arguments.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
-                            arguments.putInt(RECIPE_POSITION_KEY, mRecipePositionNumber);
-                            arguments.putInt(RECIPE_STEP_POSITION_KEY, viewHolder.getAdapterPosition());
+                            arguments.putInt(RECIPE_ID_KEY, mRecipe.getId());
+                            arguments.putInt(RECIPE_STEP_ID_KEY, mSteps.get(viewHolder.getAdapterPosition()).getStepId());
                             RecipeStepDetailFragment fragment = new RecipeStepDetailFragment();
                             fragment.setArguments(arguments);
                             mParentActivity.getSupportFragmentManager().beginTransaction()
@@ -97,9 +93,8 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                         } else {
                             Context context = view.getContext();
                             Intent intent = new Intent(context, RecipeStepDetailActivity.class);
-                            intent.putExtra(RECIPES_ARRAY_KEY, mRecipeArray);
-                            intent.putExtra(RECIPE_POSITION_KEY, mRecipePositionNumber);
-                            intent.putExtra(RECIPE_STEP_POSITION_KEY, viewHolder.getAdapterPosition());
+                            intent.putExtra(RECIPE_ID_KEY, mRecipe.getId());
+                            intent.putExtra(RECIPE_STEP_ID_KEY, mSteps.get(viewHolder.getAdapterPosition()).getStepId());
                             context.startActivity(intent);
                         }
                     }
@@ -115,7 +110,7 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         switch (holder.getItemViewType()) {
             case RECIPE_STEP_VIEW_TYPE:
                 RecipeStepViewHolder vHolder1 = (RecipeStepViewHolder) holder;
-                String shortDesc = mRecipeArray[mRecipePositionNumber].getRecipeSteps().get(position).getShortDescription();
+                String shortDesc = mSteps.get(position).getShortDescription();
                 StringBuilder stringBuilder = new StringBuilder(String.valueOf(vHolder1.getAdapterPosition()))
                         .append(". ")
                         .append(shortDesc);
@@ -123,11 +118,10 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 break;
             case INGREDIENTS_VIEW_TYPE:
                 RecipeIngredientsViewHolder vHolder2 = (RecipeIngredientsViewHolder) holder;
-                List<Ingredient> ingredientList = mRecipeArray[mRecipePositionNumber].getIngredients();
                 stringBuilder = new StringBuilder();
-                for (int i = 0; i < ingredientList.size(); i++) {
-                    stringBuilder.append(ingredientList.get(i).getIngredient());
-                    if (i < ingredientList.size() - 1)
+                for (int i = 0; i < mIngredients.size(); i++) {
+                    stringBuilder.append(mIngredients.get(i).getIngredient());
+                    if (i < mIngredients.size() - 1)
                         stringBuilder.append(", ");
                 }
                 vHolder2.recipeStepIngredients.setText(stringBuilder);
@@ -141,7 +135,8 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public int getItemCount() {
-        return mRecipeArray[mRecipePositionNumber].getRecipeSteps().size();
+        if (mSteps == null) return 0;
+        return mSteps.size();
     }
 
     static class RecipeStepViewHolder extends RecyclerView.ViewHolder {
@@ -165,9 +160,16 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public int getItemViewType(int position) {
-        if (mRecipeArray[mRecipePositionNumber].getRecipeSteps().get(position).getId() == 0)
+        if (mSteps.get(position).getStepId() == 0)
             return INGREDIENTS_VIEW_TYPE;
         else
             return RECIPE_STEP_VIEW_TYPE;
+    }
+
+    public void setSteps(Recipe recipe, List<Step> steps, List<Ingredient> ingredients) {
+        this.mRecipe = recipe;
+        this.mSteps = steps;
+        this.mIngredients = ingredients;
+        notifyDataSetChanged();
     }
 }

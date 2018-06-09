@@ -1,5 +1,5 @@
 
-package bakingapp.example.com.model;
+package bakingapp.example.com.retrofit.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -157,7 +157,6 @@ public class Recipe implements Parcelable {
         dest.writeString(image);
     }
 
-    @SuppressWarnings("unused")
     public static final Parcelable.Creator<Recipe> CREATOR = new Parcelable.Creator<Recipe>() {
         @Override
         public Recipe createFromParcel(Parcel in) {

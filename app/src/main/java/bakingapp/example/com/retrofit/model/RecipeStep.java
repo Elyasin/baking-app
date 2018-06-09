@@ -1,5 +1,5 @@
 
-package bakingapp.example.com.model;
+package bakingapp.example.com.retrofit.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -47,7 +47,7 @@ public class RecipeStep implements Parcelable {
         this.thumbnailURL = thumbnailURL;
     }
 
-    public Integer getId() {
+    public Integer getStepId() {
         return id;
     }
 

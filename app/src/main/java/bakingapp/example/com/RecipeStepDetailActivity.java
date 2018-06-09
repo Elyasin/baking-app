@@ -3,7 +3,6 @@ package bakingapp.example.com;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.ActionBar;
@@ -11,12 +10,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import java.util.Arrays;
+import bakingapp.example.com.db.RecipeDatabase;
+import bakingapp.example.com.db.model.Recipe;
+import bakingapp.example.com.db.model.Step;
 
-import bakingapp.example.com.model.Recipe;
-
-import static bakingapp.example.com.MainActivity.RECIPES_ARRAY_KEY;
-import static bakingapp.example.com.MainActivity.RECIPE_POSITION_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_ID_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_STEP_ID_KEY;
 
 /**
  * An activity representing a single Instruction detail screen. This
@@ -28,9 +27,11 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
 
     private static final String TAG = RecipeStepDetailActivity.class.getSimpleName();
 
-    private Recipe[] mRecipeArray;
-    private int mRecipePositionNumber;
-    private int mRecipeStepPositionNumber;
+    private Recipe mRecipe;
+    private Step mStep;
+
+    private RecipeDatabase mDb;
+
     private RecipeStepDetailFragment mRecipeDetailFragment;
 
     @Override
@@ -47,6 +48,8 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
 
         if (findViewById(R.id.recipe_step_detail_container) != null) {
 
+            mDb = RecipeDatabase.getsInstance(getApplicationContext());
+
             // savedInstanceState is non-null when there is fragment state
             // saved from previous configurations of this activity
             // (e.g. when rotating the screen from portrait to landscape).
@@ -56,22 +59,22 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
             //
             // http://developer.android.com/guide/components/fragments.html
             //
+            final int maxSteps, recipeId, stepId;
             if (savedInstanceState == null) {
                 // Create the detail fragment and add it to the activity
                 // using a fragment transaction.
                 Intent intent = getIntent();
-                Parcelable[] parcelables = intent.getParcelableArrayExtra(RECIPES_ARRAY_KEY);
-                mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
-                mRecipePositionNumber = intent.getIntExtra(RECIPE_POSITION_KEY, 0);
-                mRecipeStepPositionNumber = intent.getIntExtra(MainActivity.RECIPE_STEP_POSITION_KEY, 0);
 
-                replaceFragment();
+                recipeId = intent.getIntExtra(RECIPE_ID_KEY, 0);
+                stepId = intent.getIntExtra(RECIPE_STEP_ID_KEY, 0);
+                maxSteps = loadData(recipeId, stepId);
+
+                replaceFragment(mStep.getStepId());
 
             } else {
-                Parcelable[] parcelables = savedInstanceState.getParcelableArray(RECIPES_ARRAY_KEY);
-                mRecipeArray = Arrays.copyOf(parcelables, parcelables.length, Recipe[].class);
-                mRecipePositionNumber = savedInstanceState.getInt(RECIPE_POSITION_KEY);
-                mRecipeStepPositionNumber = savedInstanceState.getInt(MainActivity.RECIPE_STEP_POSITION_KEY);
+                recipeId = savedInstanceState.getInt(RECIPE_ID_KEY);
+                stepId = savedInstanceState.getInt(RECIPE_STEP_ID_KEY);
+                maxSteps = loadData(recipeId, stepId);
             }
 
             if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -84,26 +87,27 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
                 if (actionBar != null) {
                     actionBar.setDisplayHomeAsUpEnabled(true);
                 }
-                getSupportActionBar().setTitle(mRecipeArray[mRecipePositionNumber].getName());
-
+                getSupportActionBar().setTitle(mRecipe.getName());
 
                 BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
                 bottomNavigationView.setOnNavigationItemSelectedListener(
                         new BottomNavigationView.OnNavigationItemSelectedListener() {
 
+                            int currentStep = mStep.getStepId();
+
                             @Override
                             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                                 switch (item.getItemId()) {
                                     case R.id.menu_previous_step:
-                                        if (mRecipeStepPositionNumber > 0) {
-                                            mRecipeStepPositionNumber--;
-                                            replaceFragment();
+                                        if (currentStep > 0) {
+                                            currentStep--;
+                                            replaceFragment(currentStep);
                                         }
                                         break;
                                     case R.id.menu_next_step:
-                                        if (mRecipeStepPositionNumber < mRecipeArray[mRecipePositionNumber].getRecipeSteps().size() - 1) {
-                                            mRecipeStepPositionNumber++;
-                                            replaceFragment();
+                                        if (currentStep < maxSteps - 1) {
+                                            currentStep++;
+                                            replaceFragment(currentStep);
                                         }
                                         break;
                                 }
@@ -115,11 +119,10 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void replaceFragment() {
+    private void replaceFragment(int stepId) {
         Bundle arguments = new Bundle();
-        arguments.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
-        arguments.putInt(RECIPE_POSITION_KEY, mRecipePositionNumber);
-        arguments.putInt(MainActivity.RECIPE_STEP_POSITION_KEY, mRecipeStepPositionNumber);
+        arguments.putInt(RECIPE_ID_KEY, mRecipe.getId());
+        arguments.putInt(RECIPE_STEP_ID_KEY, stepId);
         mRecipeDetailFragment = new RecipeStepDetailFragment();
         mRecipeDetailFragment.setArguments(arguments);
         getSupportFragmentManager().beginTransaction()
@@ -139,10 +142,16 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArray(RECIPES_ARRAY_KEY, mRecipeArray);
-        outState.putInt(RECIPE_POSITION_KEY, mRecipePositionNumber);
-        outState.putInt(MainActivity.RECIPE_STEP_POSITION_KEY, mRecipeStepPositionNumber);
+        outState.putInt(RECIPE_ID_KEY, mRecipe.getId());
+        outState.putInt(RECIPE_STEP_ID_KEY, mStep.getStepId());
         super.onSaveInstanceState(outState);
+    }
+
+
+    private int loadData(int recipeId, int stepId) {
+        mRecipe = mDb.recipeDAO().loadRecipe(recipeId);
+        mStep = mDb.stepDAO().loadStep(recipeId, stepId);
+        return mDb.stepDAO().loadNoOfStepsOfRecipe(recipeId);
     }
 
 }

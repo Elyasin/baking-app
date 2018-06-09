@@ -8,16 +8,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.List;
+
 import bakingapp.example.com.MainActivity;
 import bakingapp.example.com.R;
 import bakingapp.example.com.RecipeStepsListActivity;
-import bakingapp.example.com.model.Recipe;
+import bakingapp.example.com.db.model.Recipe;
 
 public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder> {
 
     private static final String TAG = RecipeAdapter.class.getSimpleName();
 
-    private Recipe[] mRecipeArray;
+    private List<Recipe> mRecipeList;
 
     private final MainActivity mContext;
 
@@ -28,15 +30,11 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
     static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         TextView mRecipeName;
-        TextView mNoIngredients;
-        TextView mNoSteps;
         TextView mServings;
 
         ViewHolder(View view) {
             super(view);
             this.mRecipeName = view.findViewById(R.id.recipe_name);
-            this.mNoIngredients = view.findViewById(R.id.no_ingredients);
-            this.mNoSteps = view.findViewById(R.id.no_steps);
             this.mServings = view.findViewById(R.id.servings);
         }
     }
@@ -51,16 +49,13 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull final RecipeAdapter.ViewHolder viewHolder, final int position) {
-        viewHolder.mRecipeName.setText(mRecipeArray[position].getName());
-        viewHolder.mNoIngredients.setText(String.valueOf(mRecipeArray[position].getIngredients().size()));
-        viewHolder.mNoSteps.setText(String.valueOf(mRecipeArray[position].getRecipeSteps().size()));
-        viewHolder.mServings.setText(String.valueOf(mRecipeArray[position].getServings()));
+        viewHolder.mRecipeName.setText(mRecipeList.get(position).getName());
+        viewHolder.mServings.setText(String.valueOf(mRecipeList.get(position).getServings()));
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, RecipeStepsListActivity.class);
-                intent.putExtra(MainActivity.RECIPES_ARRAY_KEY, mRecipeArray);
-                intent.putExtra(MainActivity.RECIPE_POSITION_KEY, viewHolder.getAdapterPosition());
+                intent.putExtra(MainActivity.RECIPE_ID_KEY, mRecipeList.get(viewHolder.getAdapterPosition()).getId());
                 mContext.startActivity(intent);
             }
         });
@@ -68,12 +63,12 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        if (mRecipeArray == null) return 0;
-        return mRecipeArray.length;
+        if (mRecipeList == null) return 0;
+        return mRecipeList.size();
     }
 
-    public void swap(Recipe[] recipeArray) {
-        this.mRecipeArray = recipeArray;
+    public void setRecipes(List<Recipe> recipeList) {
+        this.mRecipeList = recipeList;
         notifyDataSetChanged();
     }
 }

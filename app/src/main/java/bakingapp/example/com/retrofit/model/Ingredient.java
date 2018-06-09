@@ -1,5 +1,5 @@
 
-package bakingapp.example.com.model;
+package bakingapp.example.com.retrofit.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -12,9 +12,11 @@ public class Ingredient implements Parcelable {
     @SerializedName("quantity")
     @Expose
     private Float quantity;
+
     @SerializedName("measure")
     @Expose
     private String measure;
+
     @SerializedName("ingredient")
     @Expose
     private String ingredient;
