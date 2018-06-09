@@ -2,6 +2,7 @@ package bakingapp.example.com.retrofit;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -9,6 +10,7 @@ import com.google.gson.GsonBuilder;
 
 import java.util.List;
 
+import bakingapp.example.com.AppExecutors;
 import bakingapp.example.com.db.RecipeDatabase;
 import bakingapp.example.com.db.model.Step;
 import bakingapp.example.com.retrofit.model.Ingredient;
@@ -24,7 +26,7 @@ public class BakingApiController implements Callback<List<Recipe>> {
 
 
     public interface OnDataLoadedListener {
-        void displayRecipes();
+        void displayRecipes(List<bakingapp.example.com.db.model.Recipe> recipeList);
     }
 
 
@@ -57,8 +59,19 @@ public class BakingApiController implements Callback<List<Recipe>> {
     @Override
     public void onResponse(@NonNull Call<List<Recipe>> call, @NonNull Response<List<Recipe>> response) {
         if (response.isSuccessful()) {
-            List<Recipe> recipes = response.body();
-            insertRecipesIntoRoom(recipes);
+            final List<Recipe> recipes = response.body();
+            AppExecutors.getsInstance().roomDb().execute(new Runnable() {
+                @Override
+                public void run() {
+                    final List<bakingapp.example.com.db.model.Recipe> recipeList = insertRecipesIntoRoom(recipes);
+                    ((AppCompatActivity) mContext).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mListener.displayRecipes(recipeList);
+                        }
+                    });
+                }
+            });
         } else {
             Log.e(TAG, response.errorBody().toString());
         }
@@ -70,7 +83,7 @@ public class BakingApiController implements Callback<List<Recipe>> {
     }
 
 
-    private void insertRecipesIntoRoom(List<Recipe> recipes) {
+    private List<bakingapp.example.com.db.model.Recipe> insertRecipesIntoRoom(List<Recipe> recipes) {
 
         RecipeDatabase db = RecipeDatabase.getsInstance(mContext.getApplicationContext());
 
@@ -89,8 +102,10 @@ public class BakingApiController implements Callback<List<Recipe>> {
                 Step step = new Step(r.getId(), recipeStep);
                 db.stepDAO().insertStep(step);
             }
+
         }
 
-        mListener.displayRecipes();
+        return db.recipeDAO().loadAllRecipes();
+
     }
 }

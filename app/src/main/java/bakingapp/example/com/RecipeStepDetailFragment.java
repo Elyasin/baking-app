@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Locale;
 
 import bakingapp.example.com.db.RecipeDatabase;
+import bakingapp.example.com.db.model.Ingredient;
+import bakingapp.example.com.db.model.Recipe;
 import bakingapp.example.com.db.model.Step;
 
 import static bakingapp.example.com.MainActivity.RECIPE_ID_KEY;
@@ -54,9 +56,9 @@ public class RecipeStepDetailFragment extends Fragment {
     private final String PLAYBACK_POSITION_KEY = "playback_position_key";
 
 
-    private bakingapp.example.com.db.model.Recipe mRecipe;
+    private Recipe mRecipe;
     private Step mStep;
-    private List<bakingapp.example.com.db.model.Ingredient> mIngredients;
+    private List<Ingredient> mIngredients;
 
     private RecipeDatabase mDb;
 
@@ -128,8 +130,7 @@ public class RecipeStepDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mDb = RecipeDatabase.getsInstance(getActivity().getApplicationContext());
-        int recipeID, stepID;
+        final int recipeID, stepID;
 
         if (savedInstanceState == null) {
             Bundle bundle = getArguments();
@@ -154,10 +155,17 @@ public class RecipeStepDetailFragment extends Fragment {
             mPlaybackPosition = savedInstanceState.getLong(PLAYBACK_POSITION_KEY);
         }
 
-        mRecipe = mDb.recipeDAO().loadRecipe(recipeID);
-        mStep = mDb.stepDAO().loadStep(recipeID, stepID);
-        mIngredients = mDb.ingredientDAO().loadAllIngredientsByRecipe(recipeID);
-
+        //Hmmm, not so good. Off loaded outside UI thread,
+        //but no guarantee is is "done" before onCreateView
+        AppExecutors.getsInstance().roomDb().execute(new Runnable() {
+            @Override
+            public void run() {
+                mDb = RecipeDatabase.getsInstance(getActivity().getApplicationContext());
+                mRecipe = mDb.recipeDAO().loadRecipe(recipeID);
+                mStep = mDb.stepDAO().loadStep(recipeID, stepID);
+                mIngredients = mDb.ingredientDAO().loadAllIngredientsByRecipe(recipeID);
+            }
+        });
     }
 
 

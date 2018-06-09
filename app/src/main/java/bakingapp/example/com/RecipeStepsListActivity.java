@@ -87,18 +87,28 @@ public class RecipeStepsListActivity extends AppCompatActivity {
 
         if (getIntent().hasExtra(MainActivity.RECIPE_ID_KEY)) {
 
-            int recipeId = getIntent().getIntExtra(MainActivity.RECIPE_ID_KEY, 0);
+            final int recipeId = getIntent().getIntExtra(MainActivity.RECIPE_ID_KEY, 0);
 
             if (recipeId == 0) {
                 Log.e(TAG, "Recipe ID should be > 0.");
                 throw new IllegalArgumentException("Recipe ID should be > 0.");
             }
 
-            mRecipe = mDb.recipeDAO().loadRecipe(recipeId);
-            mSteps = mDb.stepDAO().loadStepsByRecipe(recipeId);
-            mIngredients = mDb.ingredientDAO().loadAllIngredientsByRecipe(recipeId);
-            mRecipeStepAdapter.setSteps(mRecipe, mSteps, mIngredients);
-            getSupportActionBar().setTitle(mRecipe.getName());
+            AppExecutors.getsInstance().roomDb().execute(new Runnable() {
+                @Override
+                public void run() {
+                    mRecipe = mDb.recipeDAO().loadRecipe(recipeId);
+                    mSteps = mDb.stepDAO().loadStepsByRecipe(recipeId);
+                    mIngredients = mDb.ingredientDAO().loadAllIngredientsByRecipe(recipeId);
+                    RecipeStepsListActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mRecipeStepAdapter.setSteps(mRecipe, mSteps, mIngredients);
+                            getSupportActionBar().setTitle(mRecipe.getName());
+                        }
+                    });
+                }
+            });
         } else {
             Log.e(TAG, "Intent does not have an 'extra'. Recipe object cannot be retrieved. Activity ended.");
             Toast.makeText(this,

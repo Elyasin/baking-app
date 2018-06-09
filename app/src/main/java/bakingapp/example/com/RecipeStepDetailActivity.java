@@ -29,6 +29,7 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
 
     private Recipe mRecipe;
     private Step mStep;
+    private int mMaxSteps;
 
     private RecipeDatabase mDb;
 
@@ -59,64 +60,78 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
             //
             // http://developer.android.com/guide/components/fragments.html
             //
-            final int maxSteps, recipeId, stepId;
+            final int recipeId, stepId;
+            final boolean replaceFragment;
             if (savedInstanceState == null) {
                 // Create the detail fragment and add it to the activity
                 // using a fragment transaction.
                 Intent intent = getIntent();
-
                 recipeId = intent.getIntExtra(RECIPE_ID_KEY, 0);
                 stepId = intent.getIntExtra(RECIPE_STEP_ID_KEY, 0);
-                maxSteps = loadData(recipeId, stepId);
-
-                replaceFragment(mStep.getStepId());
-
+                replaceFragment = true;
             } else {
                 recipeId = savedInstanceState.getInt(RECIPE_ID_KEY);
                 stepId = savedInstanceState.getInt(RECIPE_STEP_ID_KEY);
-                maxSteps = loadData(recipeId, stepId);
+                replaceFragment = false;
             }
 
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-
-                Toolbar toolbar = findViewById(R.id.detail_toolbar);
-                setSupportActionBar(toolbar);
-
-                // Show the Up button in the action bar.
-                ActionBar actionBar = getSupportActionBar();
-                if (actionBar != null) {
-                    actionBar.setDisplayHomeAsUpEnabled(true);
-                }
-                getSupportActionBar().setTitle(mRecipe.getName());
-
-                BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-                bottomNavigationView.setOnNavigationItemSelectedListener(
-                        new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-                            int currentStep = mStep.getStepId();
-
-                            @Override
-                            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                                switch (item.getItemId()) {
-                                    case R.id.menu_previous_step:
-                                        if (currentStep > 0) {
-                                            currentStep--;
-                                            replaceFragment(currentStep);
-                                        }
-                                        break;
-                                    case R.id.menu_next_step:
-                                        if (currentStep < maxSteps - 1) {
-                                            currentStep++;
-                                            replaceFragment(currentStep);
-                                        }
-                                        break;
-                                }
-                                return true;
-                            }
+            AppExecutors.getsInstance().roomDb().execute(new Runnable() {
+                @Override
+                public void run() {
+                    loadData(recipeId, stepId);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (replaceFragment)
+                                replaceFragment(mStep.getStepId());
+                            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+                                portraitUISetup();
                         }
-                );
-            }
+                    });
+                }
+            });
+
         }
+    }
+
+    private void portraitUISetup() {
+
+        Toolbar toolbar = findViewById(R.id.detail_toolbar);
+        setSupportActionBar(toolbar);
+
+        // Show the Up button in the action bar.
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+        getSupportActionBar().setTitle(mRecipe.getName());
+
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+                    int currentStep = mStep.getStepId();
+
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.menu_previous_step:
+                                if (currentStep > 0) {
+                                    currentStep--;
+                                    replaceFragment(currentStep);
+                                }
+                                break;
+                            case R.id.menu_next_step:
+                                if (currentStep < mMaxSteps - 1) {
+                                    currentStep++;
+                                    replaceFragment(currentStep);
+                                }
+                                break;
+                        }
+                        return true;
+                    }
+                }
+        );
     }
 
     private void replaceFragment(int stepId) {
@@ -148,10 +163,10 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
     }
 
 
-    private int loadData(int recipeId, int stepId) {
+    private void loadData(int recipeId, int stepId) {
         mRecipe = mDb.recipeDAO().loadRecipe(recipeId);
         mStep = mDb.stepDAO().loadStep(recipeId, stepId);
-        return mDb.stepDAO().loadNoOfStepsOfRecipe(recipeId);
+        mMaxSteps = mDb.stepDAO().loadNoOfStepsOfRecipe(recipeId);
     }
 
 }

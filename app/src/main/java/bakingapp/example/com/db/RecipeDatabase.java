@@ -29,8 +29,6 @@ public abstract class RecipeDatabase extends RoomDatabase {
                 sInstance = Room.databaseBuilder(
                         context.getApplicationContext(),
                         RecipeDatabase.class, DATABASE_NAME)
-                        //TODO must be corrected. No db queries on UI thread!!!
-                        .allowMainThreadQueries()
                         .build();
             }
         }

@@ -24,8 +24,6 @@ public class MainActivity extends AppCompatActivity
     public static final String RECIPE_ID_KEY = "recipe_id_key";
     public static final String RECIPE_STEP_ID_KEY = "recpie_step_id_key";
 
-    private List<Recipe> mRecipeList;
-
     private RecyclerView mRecyclerView;
     private RecipeAdapter mRecipeAdapter;
 
@@ -68,22 +66,28 @@ public class MainActivity extends AppCompatActivity
 
         mDb = RecipeDatabase.getsInstance(getApplicationContext());
 
-        //Get data from Room
-        mRecipeList = mDb.recipeDAO().loadAllRecipes();
-        //Room is empty. Get data from internet
-        if (mRecipeList == null || mRecipeList.isEmpty()) {
-            BakingApiController bakingApiController = new BakingApiController(MainActivity.this);
-            bakingApiController.start();
-        } else { //Room has data. Display it.
-            displayRecipes();
-        }
+        loadRecipes();
     }
 
+    private void loadRecipes() {
 
-    public void displayRecipes() {
-        mRecipeList = mDb.recipeDAO().loadAllRecipes();
-        mRecipeAdapter.setRecipes(mRecipeList);
+        AppExecutors.getsInstance().roomDb().execute(new Runnable() {
+            @Override
+            public void run() {
+                List<Recipe> recipeList = mDb.recipeDAO().loadAllRecipes();
+                //Room is empty. Get data from internet
+                if (recipeList == null || recipeList.isEmpty()) {
+                    BakingApiController bakingApiController = new BakingApiController(MainActivity.this);
+                    bakingApiController.start();
+                } else { //Room has data. Display it.
+                    displayRecipes(recipeList);
+                }
+            }
+        });
+    }
 
+    public void displayRecipes(List<Recipe> recipeList) {
+        mRecipeAdapter.setRecipes(recipeList);
         mProgressBar.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.VISIBLE);
     }
