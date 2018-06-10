@@ -155,7 +155,7 @@ public class RecipeStepDetailFragment extends Fragment {
             mPlaybackPosition = savedInstanceState.getLong(PLAYBACK_POSITION_KEY);
         }
 
-        //Hmmm, not so good. Off loaded outside UI thread,
+        //TODO Hmmm, not so good. Off loaded outside UI thread,
         //but no guarantee is is "done" before onCreateView
         AppExecutors.getsInstance().roomDb().execute(new Runnable() {
             @Override

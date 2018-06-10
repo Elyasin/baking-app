@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,6 @@ import bakingapp.example.com.RecipeStepDetailActivity;
 import bakingapp.example.com.RecipeStepDetailFragment;
 import bakingapp.example.com.RecipeStepsListActivity;
 import bakingapp.example.com.db.model.Ingredient;
-import bakingapp.example.com.db.model.Recipe;
 import bakingapp.example.com.db.model.Step;
 
 import static bakingapp.example.com.MainActivity.RECIPE_ID_KEY;
@@ -32,7 +32,6 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     private RecipeStepsListActivity mParentActivity;
 
-    private Recipe mRecipe;
     private List<Step> mSteps;
     private List<Ingredient> mIngredients;
 
@@ -81,10 +80,9 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     @Override
                     public void onClick(View view) {
                         if (mTwoPane) {
-                            //RecipeStep recipeStep = (RecipeStep) view.getTag();
                             Bundle arguments = new Bundle();
-                            arguments.putInt(RECIPE_ID_KEY, mRecipe.getId());
-                            arguments.putInt(RECIPE_STEP_ID_KEY, mSteps.get(viewHolder.getAdapterPosition()).getStepId());
+                            arguments.putInt(RECIPE_ID_KEY, mSteps.get(viewHolder.getAdapterPosition()).getRecipeID());
+                            arguments.putInt(RECIPE_STEP_ID_KEY, mSteps.get(viewHolder.getAdapterPosition()).getRecipeID());
                             RecipeStepDetailFragment fragment = new RecipeStepDetailFragment();
                             fragment.setArguments(arguments);
                             mParentActivity.getSupportFragmentManager().beginTransaction()
@@ -93,7 +91,7 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                         } else {
                             Context context = view.getContext();
                             Intent intent = new Intent(context, RecipeStepDetailActivity.class);
-                            intent.putExtra(RECIPE_ID_KEY, mRecipe.getId());
+                            intent.putExtra(RECIPE_ID_KEY, mSteps.get(viewHolder.getAdapterPosition()).getRecipeID());
                             intent.putExtra(RECIPE_STEP_ID_KEY, mSteps.get(viewHolder.getAdapterPosition()).getStepId());
                             context.startActivity(intent);
                         }
@@ -166,10 +164,16 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             return RECIPE_STEP_VIEW_TYPE;
     }
 
-    public void setSteps(Recipe recipe, List<Step> steps, List<Ingredient> ingredients) {
-        this.mRecipe = recipe;
+    public void setSteps(List<Step> steps) {
         this.mSteps = steps;
-        this.mIngredients = ingredients;
+        if (mIngredients == null)
+            throw new UnsupportedOperationException("You must set ingredients first, then steps");
         notifyDataSetChanged();
+    }
+
+    public void setIngredients(List<Ingredient> ingredients) {
+        this.mIngredients = ingredients;
+        if (mSteps == null)
+            Log.d(TAG, "Ingredients set. You must also set the steps.");
     }
 }

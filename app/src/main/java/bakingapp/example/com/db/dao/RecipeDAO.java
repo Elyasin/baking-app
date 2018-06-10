@@ -21,9 +21,6 @@ public interface RecipeDAO {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void insertAllRecipes(Recipe... recipes);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void insertRecipe(Recipe recipe);
 
 

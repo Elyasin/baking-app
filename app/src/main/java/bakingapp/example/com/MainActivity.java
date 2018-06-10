@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -48,8 +49,10 @@ public class MainActivity extends AppCompatActivity
 
         mRecyclerView.setHasFixedSize(true);
 
-        if (getResources().getConfiguration().smallestScreenWidthDp >= 600) {
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+        Configuration config = getResources().getConfiguration();
+
+        if (config.smallestScreenWidthDp >= 600) {
+            if (config.orientation == Configuration.ORIENTATION_PORTRAIT)
                 mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
             else
                 mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
@@ -74,11 +77,12 @@ public class MainActivity extends AppCompatActivity
         AppExecutors.getsInstance().roomDb().execute(new Runnable() {
             @Override
             public void run() {
+                Log.d(TAG, "Actively retrieving data from database");
                 List<Recipe> recipeList = mDb.recipeDAO().loadAllRecipes();
                 //Room is empty. Get data from internet
                 if (recipeList == null || recipeList.isEmpty()) {
-                    BakingApiController bakingApiController = new BakingApiController(MainActivity.this);
-                    bakingApiController.start();
+                    Log.d(TAG, "Database empty. Retrieving data from internet");
+                    new BakingApiController(MainActivity.this).start();
                 } else { //Room has data. Display it.
                     displayRecipes(recipeList);
                 }

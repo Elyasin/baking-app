@@ -103,7 +103,8 @@ public class RecipeStepsListActivity extends AppCompatActivity {
                     RecipeStepsListActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mRecipeStepAdapter.setSteps(mRecipe, mSteps, mIngredients);
+                            mRecipeStepAdapter.setIngredients(mIngredients);
+                            mRecipeStepAdapter.setSteps(mSteps);
                             getSupportActionBar().setTitle(mRecipe.getName());
                         }
                     });

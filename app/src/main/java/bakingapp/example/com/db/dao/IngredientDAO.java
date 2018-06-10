@@ -18,9 +18,6 @@ public interface IngredientDAO {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void insertAllIngredients(Ingredient... ingredients);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void insertIngredient(Ingredient ingredient);
 
 
