@@ -6,9 +6,9 @@ import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
-import bakingapp.example.com.retrofit.model.RecipeStep;
+import bakingapp.example.com.retrofit.model.StepApi;
 
-@Entity(tableName = "step",
+@Entity(tableName = "steps",
         foreignKeys = {
                 @ForeignKey(entity = Recipe.class,
                         parentColumns = "id",
@@ -20,8 +20,8 @@ public class Step {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
-    @ColumnInfo(name = "step_id")
-    public int stepId;
+    @ColumnInfo(name = "step_no")
+    public int stepNo;
 
     @ColumnInfo(name = "recipe_id")
     public int recipeID;
@@ -40,10 +40,10 @@ public class Step {
     /*
      * constructor
      */
-    public Step(int recipeID, int stepId, String shortDescription,
+    public Step(int recipeID, int stepNo, String shortDescription,
                 String description, String videoURL, String thumbnailURL) {
         this.recipeID = recipeID;
-        this.stepId = stepId;
+        this.stepNo = stepNo;
         this.shortDescription = shortDescription;
         this.description = description;
         this.videoURL = videoURL;
@@ -53,9 +53,9 @@ public class Step {
     /*
      * Constructor for Retrofit model
      */
-    public Step(int recipeID, RecipeStep step) {
+    public Step(int recipeID, StepApi step) {
         this.recipeID = recipeID;
-        this.stepId = step.getStepId();
+        this.stepNo = step.getStepId();
         this.shortDescription = step.getShortDescription();
         this.description = step.getDescription();
         this.videoURL = step.getVideoURL();
@@ -73,12 +73,12 @@ public class Step {
         this.id = id;
     }
 
-    public int getStepId() {
-        return stepId;
+    public int getStepNo() {
+        return stepNo;
     }
 
-    public void setStepId(int stepId) {
-        this.stepId = stepId;
+    public void setStepNo(int stepNo) {
+        this.stepNo = stepNo;
     }
 
     public int getRecipeID() {

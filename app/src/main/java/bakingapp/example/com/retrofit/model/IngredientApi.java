@@ -4,7 +4,7 @@ package bakingapp.example.com.retrofit.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Ingredient {
+public class IngredientApi {
 
     @SerializedName("quantity")
     @Expose
@@ -21,7 +21,7 @@ public class Ingredient {
     /**
      * No args constructor for use in serialization
      */
-    public Ingredient() {
+    public IngredientApi() {
     }
 
     /**
@@ -29,7 +29,7 @@ public class Ingredient {
      * @param ingredient
      * @param quantity
      */
-    public Ingredient(Float quantity, String measure, String ingredient) {
+    public IngredientApi(Float quantity, String measure, String ingredient) {
         super();
         this.quantity = quantity;
         this.measure = measure;

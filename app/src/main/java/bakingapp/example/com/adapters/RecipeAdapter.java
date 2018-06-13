@@ -13,13 +13,13 @@ import java.util.List;
 import bakingapp.example.com.MainActivity;
 import bakingapp.example.com.R;
 import bakingapp.example.com.RecipeStepsListActivity;
-import bakingapp.example.com.db.model.Recipe;
+import bakingapp.example.com.db.model.RecipeWithRelations;
 
 public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder> {
 
     private static final String TAG = RecipeAdapter.class.getSimpleName();
 
-    private List<Recipe> mRecipeList;
+    private List<RecipeWithRelations> mRecipes;
 
     private final MainActivity mContext;
 
@@ -49,13 +49,13 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull final RecipeAdapter.ViewHolder viewHolder, final int position) {
-        viewHolder.mRecipeName.setText(mRecipeList.get(position).getName());
-        viewHolder.mServings.setText(String.valueOf(mRecipeList.get(position).getServings()));
+        viewHolder.mRecipeName.setText(mRecipes.get(position).getName());
+        viewHolder.mServings.setText(String.valueOf(mRecipes.get(position).getServings()));
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, RecipeStepsListActivity.class);
-                intent.putExtra(MainActivity.RECIPE_ID_KEY, mRecipeList.get(viewHolder.getAdapterPosition()).getId());
+                intent.putExtra(MainActivity.RECIPE_ID_KEY, mRecipes.get(viewHolder.getAdapterPosition()).getId());
                 mContext.startActivity(intent);
             }
         });
@@ -63,12 +63,12 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        if (mRecipeList == null) return 0;
-        return mRecipeList.size();
+        if (mRecipes == null) return 0;
+        return mRecipes.size();
     }
 
-    public void setRecipes(List<Recipe> recipeList) {
-        this.mRecipeList = recipeList;
+    public void setRecipes(List<RecipeWithRelations> recipes) {
+        this.mRecipes = recipes;
         notifyDataSetChanged();
     }
 }

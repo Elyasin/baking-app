@@ -3,6 +3,8 @@ package bakingapp.example.com.db.model;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
+import bakingapp.example.com.retrofit.model.RecipeApi;
+
 @Entity(tableName = "recipes")
 public class Recipe {
 
@@ -28,7 +30,7 @@ public class Recipe {
     /*
      * Constructor for Retrofit model
      */
-    public Recipe(bakingapp.example.com.retrofit.model.Recipe recipe) {
+    public Recipe(RecipeApi recipe) {
         id = recipe.getId();
         name = recipe.getName();
         servings = recipe.getServings();

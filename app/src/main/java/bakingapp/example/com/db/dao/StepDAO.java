@@ -13,13 +13,13 @@ import bakingapp.example.com.db.model.Step;
 public interface StepDAO {
 
 
-    @Query("select * from step where recipe_id = :recipeID")
+    @Query("select * from steps where recipe_id = :recipeID")
     public List<Step> loadStepsByRecipe(int recipeID);
 
-    @Query("select * from step where recipe_id = :recipeId and step_id = :stepID")
-    public Step loadStep(int recipeId, int stepID);
+    @Query("select * from steps where recipe_id = :recipeId and step_no = :stepNo")
+    public Step loadStep(int recipeId, int stepNo);
 
-    @Query("select count(1) from step where recipe_id = :recipeId")
+    @Query("select count(1) from steps where recipe_id = :recipeId")
     public int loadNoOfStepsOfRecipe(int recipeId);
 
 

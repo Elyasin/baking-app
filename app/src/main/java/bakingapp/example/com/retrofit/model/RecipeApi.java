@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class Recipe {
+public class RecipeApi {
 
     @SerializedName("id")
     @Expose
@@ -16,10 +16,10 @@ public class Recipe {
     private String name;
     @SerializedName("ingredients")
     @Expose
-    private List<Ingredient> ingredients = null;
+    private List<IngredientApi> ingredients = null;
     @SerializedName("steps")
     @Expose
-    private List<RecipeStep> recipeSteps = null;
+    private List<StepApi> steps = null;
     @SerializedName("servings")
     @Expose
     private Integer servings;
@@ -30,7 +30,7 @@ public class Recipe {
     /**
      * No args constructor for use in serialization
      */
-    public Recipe() {
+    public RecipeApi() {
     }
 
     /**
@@ -39,14 +39,14 @@ public class Recipe {
      * @param servings
      * @param name
      * @param image
-     * @param recipeSteps
+     * @param steps
      */
-    public Recipe(Integer id, String name, List<Ingredient> ingredients, List<RecipeStep> recipeSteps, Integer servings, String image) {
+    public RecipeApi(Integer id, String name, List<IngredientApi> ingredients, List<StepApi> steps, Integer servings, String image) {
         super();
         this.id = id;
         this.name = name;
         this.ingredients = ingredients;
-        this.recipeSteps = recipeSteps;
+        this.steps = steps;
         this.servings = servings;
         this.image = image;
     }
@@ -67,20 +67,20 @@ public class Recipe {
         this.name = name;
     }
 
-    public List<Ingredient> getIngredients() {
+    public List<IngredientApi> getIngredients() {
         return ingredients;
     }
 
-    public void setIngredients(List<Ingredient> ingredients) {
+    public void setIngredients(List<IngredientApi> ingredients) {
         this.ingredients = ingredients;
     }
 
-    public List<RecipeStep> getRecipeSteps() {
-        return recipeSteps;
+    public List<StepApi> getSteps() {
+        return steps;
     }
 
-    public void setRecipeSteps(List<RecipeStep> recipeSteps) {
-        this.recipeSteps = recipeSteps;
+    public void setSteps(List<StepApi> steps) {
+        this.steps = steps;
     }
 
     public Integer getServings() {

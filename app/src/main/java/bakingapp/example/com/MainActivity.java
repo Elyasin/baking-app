@@ -1,12 +1,14 @@
 package bakingapp.example.com;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -14,7 +16,7 @@ import java.util.List;
 
 import bakingapp.example.com.adapters.RecipeAdapter;
 import bakingapp.example.com.db.RecipeDatabase;
-import bakingapp.example.com.db.model.Recipe;
+import bakingapp.example.com.db.model.RecipeWithRelations;
 import bakingapp.example.com.retrofit.BakingApiController;
 
 public class MainActivity extends AppCompatActivity
@@ -23,14 +25,12 @@ public class MainActivity extends AppCompatActivity
     public static final String TAG = MainActivity.class.getSimpleName();
 
     public static final String RECIPE_ID_KEY = "recipe_id_key";
-    public static final String RECIPE_STEP_ID_KEY = "recpie_step_id_key";
+    public static final String RECIPE_STEP_NO_KEY = "recpie_step_id_key";
 
     private RecyclerView mRecyclerView;
     private RecipeAdapter mRecipeAdapter;
 
     private ProgressBar mProgressBar;
-
-    private RecipeDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,31 +67,36 @@ public class MainActivity extends AppCompatActivity
         mRecipeAdapter = new RecipeAdapter(this);
         mRecyclerView.setAdapter(mRecipeAdapter);
 
-        mDb = RecipeDatabase.getsInstance(getApplicationContext());
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         loadRecipes();
     }
 
     private void loadRecipes() {
 
-        AppExecutors.getsInstance().roomDb().execute(new Runnable() {
+        RecipeDatabase db = RecipeDatabase.getsInstance(getApplicationContext());
+
+        LiveData<List<RecipeWithRelations>> listLiveData =
+                db.recipeWithRelationsDAO().loadRecipesWithRelationsLive();
+
+        listLiveData.observe(this, new Observer<List<RecipeWithRelations>>() {
             @Override
-            public void run() {
-                Log.d(TAG, "Actively retrieving data from database");
-                List<Recipe> recipeList = mDb.recipeDAO().loadAllRecipes();
-                //Room is empty. Get data from internet
-                if (recipeList == null || recipeList.isEmpty()) {
-                    Log.d(TAG, "Database empty. Retrieving data from internet");
+            public void onChanged(@Nullable List<RecipeWithRelations> recipes) {
+                if (recipes == null || recipes.isEmpty()) {
                     new BakingApiController(MainActivity.this).start();
-                } else { //Room has data. Display it.
-                    displayRecipes(recipeList);
+                } else {
+                    displayRecipes(recipes);
                 }
             }
         });
+
     }
 
-    public void displayRecipes(List<Recipe> recipeList) {
-        mRecipeAdapter.setRecipes(recipeList);
+    public void displayRecipes(List<RecipeWithRelations> recipes) {
+        mRecipeAdapter.setRecipes(recipes);
         mProgressBar.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.VISIBLE);
     }

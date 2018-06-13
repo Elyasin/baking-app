@@ -1,6 +1,9 @@
 package bakingapp.example.com;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,13 +13,9 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import java.util.List;
-
 import bakingapp.example.com.adapters.RecipeStepAdapter;
 import bakingapp.example.com.db.RecipeDatabase;
-import bakingapp.example.com.db.model.Ingredient;
-import bakingapp.example.com.db.model.Recipe;
-import bakingapp.example.com.db.model.Step;
+import bakingapp.example.com.db.model.RecipeWithRelations;
 
 /**
  * An activity representing a list of Instructions. This activity
@@ -36,11 +35,7 @@ public class RecipeStepsListActivity extends AppCompatActivity {
      */
     private boolean mTwoPane;
 
-    private Recipe mRecipe;
-    private List<Step> mSteps;
-    private List<Ingredient> mIngredients;
-
-    private RecipeDatabase mDb;
+    private RecipeWithRelations mRecipe;
 
     private RecipeStepAdapter mRecipeStepAdapter;
 
@@ -78,45 +73,45 @@ public class RecipeStepsListActivity extends AppCompatActivity {
                 mTwoPane);
         mRecyclerView.setAdapter(mRecipeStepAdapter);
 
-        mDb = RecipeDatabase.getsInstance(getApplicationContext());
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
+        final RecipeDatabase db = RecipeDatabase.getsInstance(getApplicationContext());
 
         if (getIntent().hasExtra(MainActivity.RECIPE_ID_KEY)) {
 
             final int recipeId = getIntent().getIntExtra(MainActivity.RECIPE_ID_KEY, 0);
 
             if (recipeId == 0) {
-                Log.e(TAG, "Recipe ID should be > 0.");
-                throw new IllegalArgumentException("Recipe ID should be > 0.");
+                Log.e(TAG, "RecipeApi ID should be > 0.");
+                throw new IllegalArgumentException("RecipeApi ID should be > 0.");
             }
 
-            AppExecutors.getsInstance().roomDb().execute(new Runnable() {
+
+            LiveData<RecipeWithRelations> recipe = db.recipeWithRelationsDAO().loadRecipeWithRelations(recipeId);
+            Log.d(TAG, "Retrieving recipe");
+            recipe.observe(this, new Observer<RecipeWithRelations>() {
                 @Override
-                public void run() {
-                    mRecipe = mDb.recipeDAO().loadRecipe(recipeId);
-                    mSteps = mDb.stepDAO().loadStepsByRecipe(recipeId);
-                    mIngredients = mDb.ingredientDAO().loadAllIngredientsByRecipe(recipeId);
-                    RecipeStepsListActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mRecipeStepAdapter.setIngredients(mIngredients);
-                            mRecipeStepAdapter.setSteps(mSteps);
-                            getSupportActionBar().setTitle(mRecipe.getName());
-                        }
-                    });
+                public void onChanged(@Nullable RecipeWithRelations recipeWithRelations) {
+                    Log.d(TAG, "onChanged called");
+                    mRecipe = recipeWithRelations;
+                    mRecipeStepAdapter.setRecipe(mRecipe);
+                    getSupportActionBar().setTitle(mRecipe.getName());
                 }
             });
+
         } else {
-            Log.e(TAG, "Intent does not have an 'extra'. Recipe object cannot be retrieved. Activity ended.");
+            Log.e(TAG, "Intent does not have an 'extra'. RecipeApi object cannot be retrieved. Activity ended.");
             Toast.makeText(this,
-                    "Intent does not have an 'extra'. Recipe object cannot be retrieved. Activity ended.",
+                    "Intent does not have an 'extra'. RecipeApi object cannot be retrieved. Activity ended.",
                     Toast.LENGTH_SHORT).show();
             finish();
         }
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+
     }
 
     @Override

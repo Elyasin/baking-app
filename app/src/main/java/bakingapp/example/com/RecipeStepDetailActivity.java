@@ -1,21 +1,24 @@
 package bakingapp.example.com;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 
 import bakingapp.example.com.db.RecipeDatabase;
-import bakingapp.example.com.db.model.Recipe;
-import bakingapp.example.com.db.model.Step;
+import bakingapp.example.com.db.model.RecipeWithRelations;
 
 import static bakingapp.example.com.MainActivity.RECIPE_ID_KEY;
-import static bakingapp.example.com.MainActivity.RECIPE_STEP_ID_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_STEP_NO_KEY;
 
 /**
  * An activity representing a single Instruction detail screen. This
@@ -27,13 +30,9 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
 
     private static final String TAG = RecipeStepDetailActivity.class.getSimpleName();
 
-    private Recipe mRecipe;
-    private Step mStep;
-    private int mMaxSteps;
+    private RecipeWithRelations mRecipe;
+    private int mStepNo;
 
-    private RecipeDatabase mDb;
-
-    private RecipeStepDetailFragment mRecipeDetailFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,15 +40,13 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recipe_step_detail);
 
         //Activity never used in tablet when in landscape mode.
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE &&
-                getResources().getConfiguration().smallestScreenWidthDp >= 600) {
+        final Configuration config = getResources().getConfiguration();
+        if (config.orientation == Configuration.ORIENTATION_LANDSCAPE && config.smallestScreenWidthDp >= 600) {
             finish();
             return;
         }
 
         if (findViewById(R.id.recipe_step_detail_container) != null) {
-
-            mDb = RecipeDatabase.getsInstance(getApplicationContext());
 
             // savedInstanceState is non-null when there is fragment state
             // saved from previous configurations of this activity
@@ -60,34 +57,32 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
             //
             // http://developer.android.com/guide/components/fragments.html
             //
-            final int recipeId, stepId;
+            final int recipeId;
             final boolean replaceFragment;
             if (savedInstanceState == null) {
                 // Create the detail fragment and add it to the activity
                 // using a fragment transaction.
                 Intent intent = getIntent();
                 recipeId = intent.getIntExtra(RECIPE_ID_KEY, 0);
-                stepId = intent.getIntExtra(RECIPE_STEP_ID_KEY, 0);
+                mStepNo = intent.getIntExtra(RECIPE_STEP_NO_KEY, 0);
                 replaceFragment = true;
             } else {
                 recipeId = savedInstanceState.getInt(RECIPE_ID_KEY);
-                stepId = savedInstanceState.getInt(RECIPE_STEP_ID_KEY);
+                mStepNo = savedInstanceState.getInt(RECIPE_STEP_NO_KEY);
                 replaceFragment = false;
             }
 
-            AppExecutors.getsInstance().roomDb().execute(new Runnable() {
+
+            RecipeDatabase db = RecipeDatabase.getsInstance(getApplicationContext());
+            LiveData<RecipeWithRelations> recipe = db.recipeWithRelationsDAO().loadRecipeWithRelations(recipeId);
+            recipe.observe(this, new Observer<RecipeWithRelations>() {
                 @Override
-                public void run() {
-                    loadData(recipeId, stepId);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (replaceFragment)
-                                replaceFragment(mStep.getStepId());
-                            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-                                portraitUISetup();
-                        }
-                    });
+                public void onChanged(@Nullable RecipeWithRelations recipeWithRelations) {
+                    mRecipe = recipeWithRelations;
+                    if (replaceFragment)
+                        replaceFragment(mRecipe.steps.get(mStepNo).getStepNo());
+                    if (config.orientation == Configuration.ORIENTATION_PORTRAIT)
+                        portraitUISetup();
                 }
             });
 
@@ -110,7 +105,7 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
 
-                    int currentStep = mStep.getStepId();
+                    int currentStep = mRecipe.steps.get(mStepNo).getStepNo();
 
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -122,7 +117,7 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
                                 }
                                 break;
                             case R.id.menu_next_step:
-                                if (currentStep < mMaxSteps - 1) {
+                                if (currentStep < mRecipe.steps.size() - 1) {
                                     currentStep++;
                                     replaceFragment(currentStep);
                                 }
@@ -135,14 +130,17 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
     }
 
     private void replaceFragment(int stepId) {
+
         Bundle arguments = new Bundle();
         arguments.putInt(RECIPE_ID_KEY, mRecipe.getId());
-        arguments.putInt(RECIPE_STEP_ID_KEY, stepId);
-        mRecipeDetailFragment = new RecipeStepDetailFragment();
-        mRecipeDetailFragment.setArguments(arguments);
+        arguments.putInt(RECIPE_STEP_NO_KEY, stepId);
+
+        RecipeStepDetailFragment recipeDetailFragment = new RecipeStepDetailFragment();
+        recipeDetailFragment.setArguments(arguments);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.recipe_step_detail_container, mRecipeDetailFragment)
+                .replace(R.id.recipe_step_detail_container, recipeDetailFragment)
                 .commit();
+
     }
 
     @Override
@@ -152,21 +150,16 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
             onBackPressed();
             return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(RECIPE_ID_KEY, mRecipe.getId());
-        outState.putInt(RECIPE_STEP_ID_KEY, mStep.getStepId());
+        outState.putInt(RECIPE_STEP_NO_KEY, mStepNo);
         super.onSaveInstanceState(outState);
     }
 
-
-    private void loadData(int recipeId, int stepId) {
-        mRecipe = mDb.recipeDAO().loadRecipe(recipeId);
-        mStep = mDb.stepDAO().loadStep(recipeId, stepId);
-        mMaxSteps = mDb.stepDAO().loadNoOfStepsOfRecipe(recipeId);
-    }
 
 }

@@ -4,7 +4,7 @@ package bakingapp.example.com.retrofit.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class RecipeStep {
+public class StepApi {
 
     @SerializedName("id")
     @Expose
@@ -25,7 +25,7 @@ public class RecipeStep {
     /**
      * No args constructor for use in serialization
      */
-    public RecipeStep() {
+    public StepApi() {
     }
 
     /**
@@ -35,7 +35,7 @@ public class RecipeStep {
      * @param videoURL
      * @param thumbnailURL
      */
-    public RecipeStep(Integer id, String shortDescription, String description, String videoURL, String thumbnailURL) {
+    public StepApi(Integer id, String shortDescription, String description, String videoURL, String thumbnailURL) {
         super();
         this.id = id;
         this.shortDescription = shortDescription;

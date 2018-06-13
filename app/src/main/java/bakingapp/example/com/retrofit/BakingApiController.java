@@ -8,25 +8,29 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import bakingapp.example.com.AppExecutors;
 import bakingapp.example.com.db.RecipeDatabase;
+import bakingapp.example.com.db.model.Ingredient;
+import bakingapp.example.com.db.model.Recipe;
+import bakingapp.example.com.db.model.RecipeWithRelations;
 import bakingapp.example.com.db.model.Step;
-import bakingapp.example.com.retrofit.model.Ingredient;
-import bakingapp.example.com.retrofit.model.Recipe;
-import bakingapp.example.com.retrofit.model.RecipeStep;
+import bakingapp.example.com.retrofit.model.IngredientApi;
+import bakingapp.example.com.retrofit.model.RecipeApi;
+import bakingapp.example.com.retrofit.model.StepApi;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class BakingApiController implements Callback<List<Recipe>> {
+public class BakingApiController implements Callback<List<RecipeApi>> {
 
 
     public interface OnDataLoadedListener {
-        void displayRecipes(List<bakingapp.example.com.db.model.Recipe> recipeList);
+        void displayRecipes(List<RecipeWithRelations> recipes);
     }
 
 
@@ -52,61 +56,75 @@ public class BakingApiController implements Callback<List<Recipe>> {
                 addConverterFactory(GsonConverterFactory.create(gson)).
                 build();
         BakingApi bakingApi = retrofit.create(BakingApi.class);
-        Call<List<Recipe>> call = bakingApi.loadRecipes();
+        Call<List<RecipeApi>> call = bakingApi.loadRecipes();
         call.enqueue(this);
     }
 
     @Override
-    public void onResponse(@NonNull Call<List<Recipe>> call, @NonNull Response<List<Recipe>> response) {
+    public void onResponse(@NonNull Call<List<RecipeApi>> call, @NonNull Response<List<RecipeApi>> response) {
+
         if (response.isSuccessful()) {
-            final List<Recipe> recipes = response.body();
+
+            final List<RecipeApi> recipeApiList = response.body();
+
+            if (recipeApiList == null || recipeApiList.isEmpty()) {
+                Log.e(TAG, "No recipes available");
+                return;
+            }
 
             AppExecutors.getsInstance().roomDb().execute(new Runnable() {
                 @Override
                 public void run() {
-                    final List<bakingapp.example.com.db.model.Recipe> recipeList = insertRecipesIntoRoom(recipes);
+
+                    final List<RecipeWithRelations> recipes = insertRecipesIntoRoom(recipeApiList);
+
                     ((AppCompatActivity) mContext).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mListener.displayRecipes(recipeList);
+                            mListener.displayRecipes(recipes);
                         }
                     });
                 }
             });
+
         } else {
-            Log.e(TAG, response.errorBody().toString());
+            Log.e(TAG, "Unsuccessful data retrieval");
         }
     }
 
     @Override
-    public void onFailure(@NonNull Call<List<Recipe>> call, @NonNull Throwable t) {
+    public void onFailure(@NonNull Call<List<RecipeApi>> call, @NonNull Throwable t) {
         t.printStackTrace();
     }
 
 
-    private List<bakingapp.example.com.db.model.Recipe> insertRecipesIntoRoom(List<Recipe> recipes) {
+    private List<RecipeWithRelations> insertRecipesIntoRoom(List<RecipeApi> recipeApiList) {
 
         RecipeDatabase db = RecipeDatabase.getsInstance(mContext.getApplicationContext());
 
-        for (Recipe r : recipes) {
+        List<Recipe> recipeList = new ArrayList<>(recipeApiList.size());
+        List<Ingredient> ingredientList = new ArrayList<>();
+        List<Step> stepList = new ArrayList<>();
 
-            bakingapp.example.com.db.model.Recipe recipe = new bakingapp.example.com.db.model.Recipe(r);
-            db.recipeDAO().insertRecipe(recipe);
+        for (RecipeApi recipeApi : recipeApiList) {
 
-            for (Ingredient i : r.getIngredients()) {
-                bakingapp.example.com.db.model.Ingredient ingredient =
-                        new bakingapp.example.com.db.model.Ingredient(recipe.getId(), i);
-                db.ingredientDAO().insertIngredient(ingredient);
+            recipeList.add(new Recipe(recipeApi));
+
+            for (IngredientApi ingredientApi : recipeApi.getIngredients()) {
+                ingredientList.add(new Ingredient(recipeApi.getId(), ingredientApi));
             }
 
-            for (RecipeStep recipeStep : r.getRecipeSteps()) {
-                Step step = new Step(r.getId(), recipeStep);
-                db.stepDAO().insertStep(step);
+            for (StepApi stepApi : recipeApi.getSteps()) {
+                stepList.add(new Step(recipeApi.getId(), stepApi));
             }
 
         }
 
-        return db.recipeDAO().loadAllRecipes();
+        db.recipeWithRelationsDAO().insertRecipesWithRelations(
+                recipeList, ingredientList, stepList
+        );
+
+        return db.recipeWithRelationsDAO().loadRecipesWithRelations();
 
     }
 }

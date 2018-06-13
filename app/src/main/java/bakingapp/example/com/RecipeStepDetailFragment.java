@@ -37,14 +37,8 @@ import bakingapp.example.com.db.model.Recipe;
 import bakingapp.example.com.db.model.Step;
 
 import static bakingapp.example.com.MainActivity.RECIPE_ID_KEY;
-import static bakingapp.example.com.MainActivity.RECIPE_STEP_ID_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_STEP_NO_KEY;
 
-/**
- * A fragment representing a single Instruction detail screen.
- * This fragment is either contained in a {@link RecipeStepsListActivity}
- * in two-pane mode (on tablets) or a {@link RecipeStepDetailActivity}
- * on handsets.
- */
 public class RecipeStepDetailFragment extends Fragment {
 
 
@@ -75,49 +69,6 @@ public class RecipeStepDetailFragment extends Fragment {
     private ImageView mFullScreenIcon;
     private FrameLayout mFullScreenButton;
 
-    private void initFullscreenDialog() {
-
-        mFullScreenDialog = new Dialog(getActivity(), android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
-            public void onBackPressed() {
-                if (mExoPlayerFullscreen)
-                    closeFullscreenDialog();
-                super.onBackPressed();
-            }
-        };
-    }
-
-    private void openFullscreenDialog() {
-        ((ViewGroup) mPlayerView.getParent()).removeView(mPlayerView);
-        mFullScreenDialog.addContentView(mPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_fullscreen_exit_black_24dp));
-        mExoPlayerFullscreen = true;
-        mFullScreenDialog.show();
-    }
-
-    private void closeFullscreenDialog() {
-        ((ViewGroup) mPlayerView.getParent()).removeView(mPlayerView);
-        ((FrameLayout) getActivity().findViewById(R.id.media_frame)).addView(mPlayerView);
-        mExoPlayerFullscreen = false;
-        mFullScreenDialog.dismiss();
-        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_fullscreen_black_24dp));
-    }
-
-    private void initFullscreenButton() {
-
-        PlayerControlView controlView = mPlayerView.findViewById(R.id.exo_controller);
-        mFullScreenIcon = controlView.findViewById(R.id.exo_fullscreen_icon);
-        mFullScreenButton = controlView.findViewById(R.id.exo_fullscreen_button);
-        mFullScreenButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!mExoPlayerFullscreen)
-                    openFullscreenDialog();
-                else
-                    closeFullscreenDialog();
-            }
-        });
-    }
-
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -137,10 +88,10 @@ public class RecipeStepDetailFragment extends Fragment {
 
             if (bundle != null &&
                     bundle.containsKey(RECIPE_ID_KEY) &&
-                    bundle.containsKey(RECIPE_STEP_ID_KEY)) {
+                    bundle.containsKey(RECIPE_STEP_NO_KEY)) {
 
                 recipeID = bundle.getInt(RECIPE_ID_KEY);
-                stepID = bundle.getInt(RECIPE_STEP_ID_KEY);
+                stepID = bundle.getInt(RECIPE_STEP_NO_KEY);
             } else {
                 Log.e(TAG, "Bundle is null or expected keys are not present");
                 throw new IllegalArgumentException("Bundle is null or expected keys are not present");
@@ -148,7 +99,7 @@ public class RecipeStepDetailFragment extends Fragment {
 
         } else {
             recipeID = savedInstanceState.getInt(RECIPE_ID_KEY);
-            stepID = savedInstanceState.getInt(RECIPE_STEP_ID_KEY);
+            stepID = savedInstanceState.getInt(RECIPE_STEP_NO_KEY);
 
             mPlayWhenReady = savedInstanceState.getBoolean(PLAY_WHEN_READY_KEY);
             mCurrentWindow = savedInstanceState.getInt(CURRENT_WINDOW_KEY);
@@ -157,6 +108,7 @@ public class RecipeStepDetailFragment extends Fragment {
 
         //TODO Hmmm, not so good. Off loaded outside UI thread,
         //but no guarantee is is "done" before onCreateView
+        Log.d(TAG, "Executor launched");
         AppExecutors.getsInstance().roomDb().execute(new Runnable() {
             @Override
             public void run() {
@@ -172,13 +124,13 @@ public class RecipeStepDetailFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        Log.d(TAG, "onCreateView launched");
         View rootView = inflater.inflate(R.layout.recipe_step_detail, container, false);
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ||
                 getResources().getConfiguration().smallestScreenWidthDp >= 600) {
 
-            if (mStep.getStepId() == 0) {
+            if (mStep.getStepNo() == 0) {
                 for (int i = 0; i < mIngredients.size(); i++) {
                     String ingredient = mIngredients.get(i).getIngredient();
                     String measure = mIngredients.get(i).getMeasure();
@@ -226,7 +178,7 @@ public class RecipeStepDetailFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putInt(RECIPE_ID_KEY, mRecipe.getId());
-        outState.putInt(RECIPE_STEP_ID_KEY, mStep.getStepId());
+        outState.putInt(RECIPE_STEP_NO_KEY, mStep.getStepNo());
 
         //No guarantee where in the lifecycle onSaveInstanceState is called
         //check onPause (release of player), onStop (release of player), onSaveInstanceState
@@ -282,15 +234,6 @@ public class RecipeStepDetailFragment extends Fragment {
         }
     }
 
-    private void hideSystemUi() {
-        mPlayerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-    }
-
     @Override
     public void onPause() {
         super.onPause();
@@ -309,6 +252,8 @@ public class RecipeStepDetailFragment extends Fragment {
         }
     }
 
+
+    //player view init and release
 
     private void initializePlayer(String videoUrlString) {
         mSimpleExoPlayer = ExoPlayerFactory.newSimpleInstance(
@@ -337,5 +282,61 @@ public class RecipeStepDetailFragment extends Fragment {
             mSimpleExoPlayer = null;
         }
     }
+
+
+    private void hideSystemUi() {
+        mPlayerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+    }
+
+    //Full screen dialog methods
+
+    private void initFullscreenDialog() {
+
+        mFullScreenDialog = new Dialog(getActivity(), android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
+            public void onBackPressed() {
+                if (mExoPlayerFullscreen)
+                    closeFullscreenDialog();
+                super.onBackPressed();
+            }
+        };
+    }
+
+    private void openFullscreenDialog() {
+        ((ViewGroup) mPlayerView.getParent()).removeView(mPlayerView);
+        mFullScreenDialog.addContentView(mPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_fullscreen_exit_black_24dp));
+        mExoPlayerFullscreen = true;
+        mFullScreenDialog.show();
+    }
+
+    private void closeFullscreenDialog() {
+        ((ViewGroup) mPlayerView.getParent()).removeView(mPlayerView);
+        ((FrameLayout) getActivity().findViewById(R.id.media_frame)).addView(mPlayerView);
+        mExoPlayerFullscreen = false;
+        mFullScreenDialog.dismiss();
+        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_fullscreen_black_24dp));
+    }
+
+    private void initFullscreenButton() {
+
+        PlayerControlView controlView = mPlayerView.findViewById(R.id.exo_controller);
+        mFullScreenIcon = controlView.findViewById(R.id.exo_fullscreen_icon);
+        mFullScreenButton = controlView.findViewById(R.id.exo_fullscreen_button);
+        mFullScreenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mExoPlayerFullscreen)
+                    openFullscreenDialog();
+                else
+                    closeFullscreenDialog();
+            }
+        });
+    }
+
 
 }

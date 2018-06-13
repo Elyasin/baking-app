@@ -18,10 +18,11 @@ import bakingapp.example.com.RecipeStepDetailActivity;
 import bakingapp.example.com.RecipeStepDetailFragment;
 import bakingapp.example.com.RecipeStepsListActivity;
 import bakingapp.example.com.db.model.Ingredient;
+import bakingapp.example.com.db.model.RecipeWithRelations;
 import bakingapp.example.com.db.model.Step;
 
 import static bakingapp.example.com.MainActivity.RECIPE_ID_KEY;
-import static bakingapp.example.com.MainActivity.RECIPE_STEP_ID_KEY;
+import static bakingapp.example.com.MainActivity.RECIPE_STEP_NO_KEY;
 
 public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -32,10 +33,9 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     private RecipeStepsListActivity mParentActivity;
 
-    private List<Step> mSteps;
-    private List<Ingredient> mIngredients;
-
     private final boolean mTwoPane;
+
+    private RecipeWithRelations mRecipe;
 
 
     public RecipeStepAdapter(RecipeStepsListActivity parent,
@@ -79,10 +79,11 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        List<Step> steps = mRecipe.steps;
                         if (mTwoPane) {
                             Bundle arguments = new Bundle();
-                            arguments.putInt(RECIPE_ID_KEY, mSteps.get(viewHolder.getAdapterPosition()).getRecipeID());
-                            arguments.putInt(RECIPE_STEP_ID_KEY, mSteps.get(viewHolder.getAdapterPosition()).getRecipeID());
+                            arguments.putInt(RECIPE_ID_KEY, steps.get(viewHolder.getAdapterPosition()).getRecipeID());
+                            arguments.putInt(RECIPE_STEP_NO_KEY, steps.get(viewHolder.getAdapterPosition()).getStepNo());
                             RecipeStepDetailFragment fragment = new RecipeStepDetailFragment();
                             fragment.setArguments(arguments);
                             mParentActivity.getSupportFragmentManager().beginTransaction()
@@ -91,8 +92,8 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                         } else {
                             Context context = view.getContext();
                             Intent intent = new Intent(context, RecipeStepDetailActivity.class);
-                            intent.putExtra(RECIPE_ID_KEY, mSteps.get(viewHolder.getAdapterPosition()).getRecipeID());
-                            intent.putExtra(RECIPE_STEP_ID_KEY, mSteps.get(viewHolder.getAdapterPosition()).getStepId());
+                            intent.putExtra(RECIPE_ID_KEY, steps.get(viewHolder.getAdapterPosition()).getRecipeID());
+                            intent.putExtra(RECIPE_STEP_NO_KEY, steps.get(viewHolder.getAdapterPosition()).getStepNo());
                             context.startActivity(intent);
                         }
                     }
@@ -106,20 +107,23 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
 
         switch (holder.getItemViewType()) {
+
             case RECIPE_STEP_VIEW_TYPE:
+                List<Step> steps = mRecipe.steps;
                 RecipeStepViewHolder vHolder1 = (RecipeStepViewHolder) holder;
-                String shortDesc = mSteps.get(position).getShortDescription();
+                String shortDesc = steps.get(holder.getAdapterPosition()).getShortDescription();
                 StringBuilder stringBuilder = new StringBuilder(String.valueOf(vHolder1.getAdapterPosition()))
                         .append(". ")
                         .append(shortDesc);
                 vHolder1.recipeStepTextView.setText(stringBuilder);
                 break;
             case INGREDIENTS_VIEW_TYPE:
+                List<Ingredient> ingredients = mRecipe.ingredients;
                 RecipeIngredientsViewHolder vHolder2 = (RecipeIngredientsViewHolder) holder;
                 stringBuilder = new StringBuilder();
-                for (int i = 0; i < mIngredients.size(); i++) {
-                    stringBuilder.append(mIngredients.get(i).getIngredient());
-                    if (i < mIngredients.size() - 1)
+                for (int i = 0; i < ingredients.size(); i++) {
+                    stringBuilder.append(ingredients.get(i).getIngredient());
+                    if (i < ingredients.size() - 1)
                         stringBuilder.append(", ");
                 }
                 vHolder2.recipeStepIngredients.setText(stringBuilder);
@@ -133,9 +137,10 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public int getItemCount() {
-        if (mSteps == null) return 0;
-        return mSteps.size();
+        if (mRecipe == null || mRecipe.steps == null) return 0;
+        return mRecipe.steps.size();
     }
+
 
     static class RecipeStepViewHolder extends RecyclerView.ViewHolder {
         final TextView recipeStepTextView;
@@ -158,22 +163,17 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public int getItemViewType(int position) {
-        if (mSteps.get(position).getStepId() == 0)
+        if (mRecipe.steps.get(position).getStepNo() == 0)
             return INGREDIENTS_VIEW_TYPE;
         else
             return RECIPE_STEP_VIEW_TYPE;
     }
 
-    public void setSteps(List<Step> steps) {
-        this.mSteps = steps;
-        if (mIngredients == null)
-            throw new UnsupportedOperationException("You must set ingredients first, then steps");
+
+    public void setRecipe(RecipeWithRelations recipe) {
+        this.mRecipe = recipe;
+        Log.d(TAG, "Reipce steps: " + recipe.steps.size());
         notifyDataSetChanged();
     }
 
-    public void setIngredients(List<Ingredient> ingredients) {
-        this.mIngredients = ingredients;
-        if (mSteps == null)
-            Log.d(TAG, "Ingredients set. You must also set the steps.");
-    }
 }

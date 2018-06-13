@@ -6,13 +6,14 @@ import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
+import bakingapp.example.com.retrofit.model.IngredientApi;
+
 @Entity(tableName = "ingredients",
         foreignKeys = {
                 @ForeignKey(entity = Recipe.class,
                         parentColumns = "id",
                         childColumns = "recipe_id",
-                        onDelete = ForeignKey.CASCADE)
-        },
+                        onDelete = ForeignKey.CASCADE)},
         indices = @Index("recipe_id"))
 public class Ingredient {
 
@@ -24,7 +25,7 @@ public class Ingredient {
 
     public String ingredient;
 
-    public float quantity;
+    public Float quantity;
 
     public String measure;
 
@@ -41,7 +42,7 @@ public class Ingredient {
     /*
      * Constructor for Retrofit model
      */
-    public Ingredient(int recipeID, bakingapp.example.com.retrofit.model.Ingredient ingredient) {
+    public Ingredient(int recipeID, IngredientApi ingredient) {
         this.recipeID = recipeID;
         this.ingredient = ingredient.getIngredient();
         this.quantity = ingredient.getQuantity();
@@ -75,11 +76,11 @@ public class Ingredient {
         this.ingredient = ingredient;
     }
 
-    public float getQuantity() {
+    public Float getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(float quantity) {
+    public void setQuantity(Float quantity) {
         this.quantity = quantity;
     }
 
