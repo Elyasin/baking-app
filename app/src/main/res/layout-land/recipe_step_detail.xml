@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -18,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/no_video_available"
-        android:padding="16dp"
+        android:padding="@dimen/padding_no_video_landscape"
         android:src="@drawable/ic_videocam_off_black_24dp"/>
 
 </FrameLayout>

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -10,8 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        tools:context=".RecipeStepDetailFragment">
-
+        tools:context="de.shaladi.bakingapp.ui.RecipeStepDetailFragment">
 
         <FrameLayout
             android:id="@+id/media_frame"
@@ -28,9 +26,9 @@
             <ImageView
                 android:id="@+id/no_video_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="300dp"
                 android:contentDescription="@string/no_video_available"
-                android:padding="16dp"
+                android:padding="@dimen/padding_no_video"
                 android:src="@drawable/ic_videocam_off_black_24dp"/>
 
         </FrameLayout>
@@ -40,7 +38,7 @@
             style="?android:attr/textAppearanceMedium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"/>
+            android:padding="@dimen/text_margin"/>
 
     </LinearLayout>
 

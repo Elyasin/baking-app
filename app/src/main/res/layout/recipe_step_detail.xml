@@ -1,45 +1,39 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<ScrollView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/media_frame"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
-        <FrameLayout
-            android:id="@+id/media_frame"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.google.android.exoplayer2.ui.PlayerView
-                android:id="@+id/player_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:resize_mode="fixed_width"
-                app:show_timeout="2000"/>
-
-            <ImageView
-                android:id="@+id/no_video_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/no_video_available"
-                android:padding="16dp"
-                android:src="@drawable/ic_videocam_off_black_24dp"/>
-
-        </FrameLayout>
-
-        <TextView
-            android:id="@+id/recipe_step_detail"
-            style="?android:attr/textAppearanceMedium"
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/player_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"/>
+            app:resize_mode="fixed_width"
+            app:show_timeout="2000"/>
 
-    </LinearLayout>
+        <ImageView
+            android:id="@+id/no_video_view"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:contentDescription="@string/no_video_available"
+            android:padding="@dimen/padding_no_video"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_videocam_off_black_24dp"/>
 
-</ScrollView>
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/recipe_step_detail"
+        style="?android:attr/textAppearanceMedium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/padding_no_video"/>
+
+</LinearLayout>
+

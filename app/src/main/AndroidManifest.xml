@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="bakingapp.example.com">
+          package="de.shaladi.bakingapp">
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
-        <activity android:name=".MainActivity">
+        <activity android:name="de.shaladi.bakingapp.ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -21,21 +21,21 @@
         </activity>
 
         <activity
-            android:name=".RecipeStepsListActivity"
+            android:name="de.shaladi.bakingapp.ui.RecipeStepsListActivity"
             android:label="@string/title_recipe_name"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName="de.shaladi.bakingapp.ui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value="de.shaladi.bakingapp.ui.MainActivity"/>
         </activity>
 
         <activity
-            android:name=".RecipeStepDetailActivity"
+            android:name="de.shaladi.bakingapp.ui.RecipeStepDetailActivity"
             android:label="@string/title_recipe_name"
-            android:parentActivityName=".RecipeStepsListActivity">
+            android:parentActivityName="de.shaladi.bakingapp.ui.RecipeStepsListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".RecipeStepsListActivity"/>
+                android:value="de.shaladi.bakingapp.ui.RecipeStepsListActivity"/>
         </activity>
 
     </application>

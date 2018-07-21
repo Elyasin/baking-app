@@ -4,4 +4,7 @@
     <dimen name="item_width">250dp</dimen>
     <dimen name="text_margin">16dp</dimen>
     <dimen name="margin_from_app_bar">16dp</dimen>
+    <dimen name="side_list_margin">16dp</dimen>
+    <dimen name="padding_no_video">16dp</dimen>
+    <dimen name="padding_no_video_landscape">48dp</dimen>
 </resources>

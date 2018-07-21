@@ -1,16 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
-    android:baselineAligned="false"
-    android:divider="?android:attr/dividerHorizontal"
+    android:layout_marginLeft="@dimen/side_list_margin"
+    android:layout_marginRight="@dimen/side_list_margin"
     android:orientation="horizontal"
-    android:showDividers="middle"
-    tools:context=".RecipeStepsListActivity">
+    tools:context="de.shaladi.bakingapp.ui.RecipeStepsListActivity">
 
     <!--
     This layout is a two-pane layout for the
@@ -25,9 +21,9 @@
         android:name="bakingapp.example.com.RecipeStepDetailFragment"
         android:layout_width="@dimen/item_width"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        tools:context="bakingapp.example.com.RecipeStepsListActivity"
+        android:layout_marginLeft="@dimen/side_list_margin"
+        android:layout_marginRight="@dimen/side_list_margin"
+        tools:context="bakingapp.example.com.de.shaladi.bakingapp.RecipeStepsListActivity"
         tools:listitem="@layout/recipe_steps_list_content"/>
 
     <FrameLayout

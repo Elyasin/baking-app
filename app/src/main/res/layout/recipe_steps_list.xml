@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.RecyclerView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -6,7 +5,7 @@
     android:name="bakingapp.example.com.InstructionListFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
-    tools:context=".RecipeStepsListActivity"
+    android:layout_marginLeft="@dimen/side_list_margin"
+    android:layout_marginRight="@dimen/side_list_margin"
+    tools:context="de.shaladi.bakingapp.ui.RecipeStepsListActivity"
     tools:listitem="@layout/recipe_steps_list_content"/>
