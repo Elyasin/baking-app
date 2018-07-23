@@ -44,8 +44,6 @@ public class RecipeStepDetailFragment extends Fragment {
     public static final String video_url_key = "video_url_key";
     public static final String list_of_ingredients_key = "list_of_ingredients_key";
     public static final String step_number_key = "step_number_key";
-    public static final String recipe_name_key = "recipe_name_key";
-    public static final String max_step_mumber_key = "max_step_mumber_key";
 
 
     private final String PLAY_WHEN_READY_KEY = "play_when_ready_key";
@@ -89,15 +87,11 @@ public class RecipeStepDetailFragment extends Fragment {
 
             //get ingredients or step description and video/thumbnail url
             if (bundle != null &&
-                    //        bundle.containsKey(RECIPE_ID_KEY) &&
-                    //        bundle.containsKey(RECIPE_STEP_NO_KEY))
                     bundle.containsKey(step_description_key) &&
                     bundle.containsKey(list_of_ingredients_key) &&
                     bundle.containsKey(video_url_key) &&
                     bundle.containsKey(step_number_key)) {
 
-                //mRecipeId = bundle.getInt(RECIPE_ID_KEY);
-                //mStepNo = bundle.getInt(RECIPE_STEP_NO_KEY);
                 mStepDescription = bundle.getString(step_description_key);
                 mVideoUrl = bundle.getString(video_url_key);
                 mIngredients = bundle.getParcelableArrayList(list_of_ingredients_key);
@@ -108,8 +102,6 @@ public class RecipeStepDetailFragment extends Fragment {
             }
 
         } else {
-            //mRecipeId = savedInstanceState.getInt(RECIPE_ID_KEY);
-            //mStepNo = savedInstanceState.getInt(RECIPE_STEP_NO_KEY);
             mStepDescription = savedInstanceState.getString(step_description_key);
             mVideoUrl = savedInstanceState.getString(video_url_key);
             mIngredients = savedInstanceState.getParcelableArrayList(list_of_ingredients_key);
@@ -176,8 +168,7 @@ public class RecipeStepDetailFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        //outState.putInt(RECIPE_ID_KEY, mRecipeId);
-        //outState.putInt(RECIPE_STEP_NO_KEY, mStepNo);
+
         outState.putString(step_description_key, mStepDescription);
         outState.putString(video_url_key, mVideoUrl);
         outState.putParcelableArrayList(list_of_ingredients_key, mIngredients);
@@ -220,9 +211,15 @@ public class RecipeStepDetailFragment extends Fragment {
             initFullscreenButton();
             if (mExoPlayerFullscreen) {
                 ((ViewGroup) mPlayerView.getParent()).removeView(mPlayerView);
-                mFullScreenDialog.addContentView(mPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                mFullScreenDialog.addContentView(
+                        mPlayerView,
+                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT)
+                );
                 assert getActivity() != null;
-                mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_fullscreen_black_24dp));
+                mFullScreenIcon.setImageDrawable(
+                        ContextCompat.getDrawable(getActivity(), R.drawable.ic_fullscreen_black_24dp)
+                );
                 mFullScreenDialog.show();
             }
         }
@@ -256,6 +253,8 @@ public class RecipeStepDetailFragment extends Fragment {
 
         mPlayerView.setPlayer(mSimpleExoPlayer);
 
+        //if fragment not visible ensure no video starts playing
+        if (!this.isVisible()) mPlayWhenReady = false;
         mSimpleExoPlayer.setPlayWhenReady(mPlayWhenReady);
         mSimpleExoPlayer.seekTo(mCurrentWindow, mPlaybackPosition);
 

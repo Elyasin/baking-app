@@ -39,7 +39,6 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recipe_step_detail);
 
         //Activity never used in tablet when in landscape mode.
         final Configuration config = getResources().getConfiguration();
@@ -49,6 +48,7 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
             return;
         }
 
+        setContentView(R.layout.activity_recipe_step_detail);
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -88,6 +88,7 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
         });
 
     }
+
 
     private void portraitUISetup() {
 
@@ -130,10 +131,6 @@ public class RecipeStepDetailActivity extends AppCompatActivity {
     }
 
     private void replaceFragment(int stepNumber) {
-
-        //Bundle arguments = new Bundle();
-        //arguments.putInt(RECIPE_ID_KEY, mRecipeId);
-        //arguments.putInt(RECIPE_STEP_NO_KEY, stepId);
 
         Bundle arguments = new Bundle();
         arguments.putInt(RecipeStepDetailFragment.step_number_key, stepNumber);

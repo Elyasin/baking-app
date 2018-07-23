@@ -81,6 +81,7 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     List<Step> steps = mRecipe.getSteps();
                     Step step = steps.get(viewHolder.getAdapterPosition());
                     if (mTwoPane) {
+
                         Bundle arguments = new Bundle();
                         arguments.putInt(RecipeStepDetailFragment.step_number_key, step.getStepNo());
                         arguments.putString(RecipeStepDetailFragment.step_description_key, step.getDescription());
@@ -92,19 +93,20 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                                 RecipeStepDetailFragment.video_url_key,
                                 !TextUtils.isEmpty(step.getVideoURL()) ? step.getVideoURL() : step.getThumbnailURL()
                         );
-                        //arguments.putInt(RECIPE_ID_KEY, step.getRecipeID());
-                        //arguments.putInt(RECIPE_STEP_NO_KEY, step.getStepNo());
+
                         RecipeStepDetailFragment fragment = new RecipeStepDetailFragment();
                         fragment.setArguments(arguments);
                         mParentActivity.getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.recipe_step_detail_container, fragment)
                                 .commit();
+
                     } else {
                         Context context = view.getContext();
                         Intent intent = new Intent(context, RecipeStepDetailActivity.class);
                         intent.putExtra(RECIPE_ID_KEY, step.getRecipeID());
                         intent.putExtra(RECIPE_STEP_NO_KEY, step.getStepNo());
                         context.startActivity(intent);
+
                     }
                 }
         );
