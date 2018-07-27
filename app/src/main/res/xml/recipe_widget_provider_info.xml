@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialKeyguardLayout="@layout/recipe_widget_list_view"
+    android:initialLayout="@layout/recipe_widget_list_view"
+    android:minHeight="110dp"
+    android:minWidth="110dp"
+    android:previewImage="@drawable/ic_launcher_foreground"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen">
+</appwidget-provider>

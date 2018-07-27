@@ -21,6 +21,11 @@ public abstract class RecipeWithRelationsDAO {
     private static final String TAG = RecipeWithRelationsDAO.class.getSimpleName();
 
 
+    // Retrive ingredients of a recipe (used in widget)
+    @Query("select * from ingredients where recipe_id = :recipeId")
+    public abstract List<Ingredient> getIngredientsByRecipeId(int recipeId);
+
+
     // Retreive data with relations
 
     @Transaction

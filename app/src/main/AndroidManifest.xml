@@ -12,31 +12,53 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
-        <activity android:name="de.shaladi.bakingapp.ui.MainActivity">
+        <activity android:name=".ui.MainActivity">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
         </activity>
 
         <activity
-            android:name="de.shaladi.bakingapp.ui.RecipeStepsListActivity"
+            android:name=".ui.RecipeStepsListActivity"
             android:label="@string/title_recipe_name"
-            android:parentActivityName="de.shaladi.bakingapp.ui.MainActivity">
+            android:parentActivityName=".ui.MainActivity">
+
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="de.shaladi.bakingapp.ui.MainActivity"/>
+
         </activity>
 
         <activity
-            android:name="de.shaladi.bakingapp.ui.RecipeStepDetailActivity"
+            android:name=".ui.RecipeStepDetailActivity"
             android:label="@string/title_recipe_name"
-            android:parentActivityName="de.shaladi.bakingapp.ui.RecipeStepsListActivity">
+            android:parentActivityName=".ui.RecipeStepsListActivity">
+
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="de.shaladi.bakingapp.ui.RecipeStepsListActivity"/>
+
         </activity>
+
+        <receiver android:name="bakingapp.example.com.RecipeWidgetProvider">
+
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/recipe_widget_provider_info"/>
+
+        </receiver>
+
+        <service
+            android:name=".ListRemoteViewsService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"/>
 
     </application>
 

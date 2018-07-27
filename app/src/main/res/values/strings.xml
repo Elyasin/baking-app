@@ -11,4 +11,6 @@
     <string name="next_step">Next step</string>
     <string name="no_video_available">No video available</string>
     <string name="full_screen_button">Full screen button</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>
