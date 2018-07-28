@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/ingredients_label"
-        android:textAppearance="?attr/textAppearanceListItem"
+        android:textAppearance="?android:attr/textAppearanceListItem"
         android:textStyle="bold"
         tools:text="Ingredients"/>
 
@@ -23,4 +23,5 @@
         android:textAppearance="?attr/textAppearanceListItemSecondary"
         android:textColor="@android:color/darker_gray"
         tools:text="Butter, flower, breadcrumbs..."/>
+
 </LinearLayout>

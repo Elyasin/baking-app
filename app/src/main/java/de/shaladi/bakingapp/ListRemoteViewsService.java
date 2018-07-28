@@ -2,29 +2,37 @@ package de.shaladi.bakingapp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
 import java.util.List;
+import java.util.Locale;
 
 import de.shaladi.bakingapp.db.RecipeDatabase;
 import de.shaladi.bakingapp.model.Ingredient;
 
 public class ListRemoteViewsService extends RemoteViewsService {
+
+    public static final String TAG = ListRemoteViewsService.class.getSimpleName();
+
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        return new ListRemoteViewsFactory(this.getApplicationContext());
+        //int recipeId = intent.getIntExtra(RECIPE_ID_KEY, 1);
+        int recipeId = Integer.valueOf(intent.getData().getSchemeSpecificPart());
+        return new ListRemoteViewsFactory(this.getApplicationContext(), recipeId);
     }
 }
 
 class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
-    Context mContext;
-    List<Ingredient> mIngredients;
+    private Context mContext;
+    private List<Ingredient> mIngredients;
+    private String mRecipeName;
+    private int mRecipeId;
 
-    public ListRemoteViewsFactory(Context mContext) {
+    ListRemoteViewsFactory(Context mContext, int recipeId) {
         this.mContext = mContext;
+        this.mRecipeId = recipeId;
     }
 
     @Override
@@ -34,7 +42,8 @@ class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
     @Override
     public void onDataSetChanged() {
-        mIngredients = RecipeDatabase.getsInstance(mContext).recipeWithRelationsDAO().getIngredientsByRecipeId(1);
+        mIngredients = RecipeDatabase.getsInstance(mContext).recipeWithRelationsDAO().getIngredientsByRecipeId(mRecipeId);
+        mRecipeName = RecipeDatabase.getsInstance(mContext).recipeWithRelationsDAO().getRecipeName(mRecipeId);
     }
 
     @Override
@@ -44,15 +53,38 @@ class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
     @Override
     public int getCount() {
-        Log.d("Elyasin", "Size: " + mIngredients.size());
         return mIngredients.size();
     }
 
     @Override
     public RemoteViews getViewAt(int position) {
-        RemoteViews remoteViews = new RemoteViews(mContext.getPackageName(), R.layout.recipe_steps_list_content);
-        remoteViews.setTextViewText(R.id.recipe_step_description, mIngredients.get(position).getIngredient());
-        return remoteViews;
+
+        if (position == 0) {
+
+            RemoteViews remoteViews = new RemoteViews(mContext.getPackageName(), R.layout.ingredients_widget_list_header);
+            remoteViews.setTextViewText(R.id.ingredient_title, mRecipeName);
+
+            return remoteViews;
+
+        } else {
+
+            Ingredient ingredient = mIngredients.get(position);
+            String ingredientString = ingredient.getIngredient();
+            String measure = ingredient.getMeasure();
+            float quantity = ingredient.getQuantity();
+            String text;
+            if (quantity == (long) quantity)
+                text = String.format(Locale.ENGLISH, "%d %s of %s", (long) quantity, measure, ingredientString);
+            else
+                text = String.format(Locale.ENGLISH, "%s %s of %s", quantity, measure, ingredientString);
+
+            RemoteViews remoteViews = new RemoteViews(mContext.getPackageName(), R.layout.ingredients_widget_list_item);
+            remoteViews.setTextViewText(R.id.ingredient, text);
+
+            return remoteViews;
+
+        }
+
     }
 
     @Override
@@ -62,7 +94,7 @@ class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
     @Override
     public int getViewTypeCount() {
-        return 1;
+        return 2;
     }
 
     @Override

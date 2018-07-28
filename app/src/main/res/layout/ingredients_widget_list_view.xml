@@ -1,0 +1,30 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/widget_margin"
+    android:background="@android:color/white">
+
+    <ListView
+        android:id="@+id/ingredients_widget_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:divider="@color/grey_light"
+        android:dividerHeight="1dp"
+        android:listSelector="@drawable/list_item_selector"
+        tools:listheader="@layout/ingredients_widget_list_header"
+        tools:listitem="@layout/ingredients_widget_list_item"/>
+
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/text_margin"
+        android:text="@string/no_recipe_chosen_at_the_moment"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        tools:visibility="gone"/>
+
+</FrameLayout>
