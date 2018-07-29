@@ -4,6 +4,8 @@
     android:id="@+id/ingredient"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/text_margin"
+    android:paddingBottom="@dimen/list_item_vertical_padding"
+    android:paddingTop="@dimen/list_item_vertical_padding"
     android:textAppearance="?android:attr/textAppearanceListItem"
+    android:textColor="@android:color/black"
     tools:text="ingredient"/>

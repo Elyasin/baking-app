@@ -3,9 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ingredient_title"
     style="@style/TextAppearance.AppCompat.Title"
+    android:textColor="@android:color/black"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="@dimen/text_margin"
+    android:paddingBottom="@dimen/title_padding_bottom"
     tools:text="Nutella Pie"/>
 
 
