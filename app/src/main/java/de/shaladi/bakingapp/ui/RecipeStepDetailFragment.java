@@ -253,8 +253,13 @@ public class RecipeStepDetailFragment extends Fragment {
 
         mPlayerView.setPlayer(mSimpleExoPlayer);
 
+        /* commenting below line in response to review comment
+         * though this leads to an issue in tablet mode:
+         * if you are in landscape watching a video and change to portrait
+         * then the video is resumed although it is not visible
+         */
         //if fragment not visible ensure no video starts playing
-        if (!this.isVisible()) mPlayWhenReady = false;
+        //if (!this.isVisible()) mPlayWhenReady = false;
         mSimpleExoPlayer.setPlayWhenReady(mPlayWhenReady);
         mSimpleExoPlayer.seekTo(mCurrentWindow, mPlaybackPosition);
 
